@@ -1,0 +1,9 @@
+{
+  "plugins": ["prettier-plugin-organize-attributes"],
+  "attributeGroups": ["$DEFAULT"],
+  "attributeSort": "ASC",
+  "printWidth": 100,
+  "singleQuote": true,
+  "tabWidth": 2,
+  "proseWrap": "always"
+}
