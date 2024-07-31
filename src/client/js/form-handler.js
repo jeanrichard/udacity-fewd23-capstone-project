@@ -91,8 +91,8 @@ const BACKEND_API_BASE_URL = 'http://localhost:3000';
 /**
  * Endpoint for sentiment analysis.
  */
-const SENTIMENT_ANALYSIS_ENDPOINT = `${BACKEND_API_BASE_URL}/analyze-sentiment`;
-// const SENTIMENT_ANALYSIS_ENDPOINT = `${BACKEND_API_BASE_URL}/test/analyze-sentiment`;
+const GET_DESTINATION_ENDPOINT = `${BACKEND_API_BASE_URL}/getDestination`;
+// const GET_DESTINATION_ENDPOINT = `${BACKEND_API_BASE_URL}/test/getDestination`;
 
 /**
  * Updates the UI.
@@ -119,6 +119,36 @@ function displayResults(trip) {
 }
 
 /**
+ * Searches for a destination (currently using the GeoNames service).
+ * Returns either `[true, resData]` or `[false, message]`.
+ * @param {string} destination the destination to search for.
+ */
+async function getDestination(destination) {
+  // As an improvement, if `(err.name == 'AbortError')` we could retry with some backoff strategy.
+
+  // Generic error message.
+  const errMsg = `Failed to find destination '${destination}.`;
+
+  try {
+    const endpoint = GET_DESTINATION_ENDPOINT;
+    console.log('getDestination: endpoint:', endpoint);
+
+    const [res, resData] = await postData(endpoint, { query: destination });
+    console.log('getDestination: res.status=', res.status, ', resData=', resData);
+
+    // We check the HTTP status code.
+    if (!res.ok || resData === null) {
+      return [false, { message: errMsg }];
+    }
+
+    return [true, resData];
+  } catch (err) {
+    console.log('getDestination: err:', err);
+    return [false, { message: errMsg }];
+  }
+}
+
+/**
  * Handles the submit event:
  * 1) Validates inputs. (Displays an alert and stops if invalid.)
  * 2) Contact the backend API to (fixme). (Displays an alert and stops if error.)
@@ -132,6 +162,32 @@ export async function handleSubmit(event) {
 
   // We do no want to submit the form.
   event.preventDefault();
+
+  // We retrieve the destination.
+  /** @type {string} */
+  // @ts-ignore: Object is possibly 'null'.
+  const destination = document.getElementById('destination').value;
+
+  // We retrieve the date.
+  /** @type {string} */
+  // @ts-ignore: Object is possibly 'null'.
+  const date = document.getElementById('date').value;
+
+  console.log('date =', date, 'type =');
+
+  try {
+    const [ok, resData] = await getDestination(destination);
+    console.log('after getDestination: ok=', ok, ', resData=', resData);
+
+    if (!ok) {
+      // FIXME Need to display error.
+      return;
+    }
+
+    const { lng, lat, name, countryName } = resData;
+    console.log('after getDestination: lng=', lng, ', lat=', lat, ', name=', name, ', countryName=', countryName);
+  }
+  finally { }
 
   // FIXME This needs to be updated.
 

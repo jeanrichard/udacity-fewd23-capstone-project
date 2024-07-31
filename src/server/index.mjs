@@ -71,7 +71,9 @@ async function getData(url, timeoutMs = DEFAULT_TIMEOUT_MS) {
 /**
  * Base URL of the GeoNames Search API (not versioned).
  */
-const GEONAMES_SEARCH_API_BASE_URL = 'http://api.geonames.org/searchJSON';
+// const GEONAMES_SEARCH_API_BASE_URL = 'http://api.geonames.org/searchJSON';
+// https://forum.geonames.org/gforum/posts/list/35422.page
+const GEONAMES_SEARCH_API_BASE_URL = 'https://secure.geonames.org/searchJSON';
 
 /**
  * Builds the request URL to do a geo-search.
@@ -103,39 +105,43 @@ function geoSearchMakeUrl(q, username, maxRows = 20) {
 /**
  * Uses the GeoNames Search API to find a location.
  *
- * @param {string} query the text entered by the user so far.
+ * @param {string} destination the destination query.
  * @param {string} username the username to use with the API.
  * @param {number} timeoutMs the timeout, in ms (optional).
  * @returns {Promise<[number, any]>} see the documentation of the
  * {@link https://learn.meaningcloud.com/developer/sentiment-analysis/2.1/doc |Sentiment Analysis API}.
  */
-async function geoSearch(query, username, timeoutMs = DEFAULT_TIMEOUT_MS) {
+async function getDestination(destination, username, timeoutMs = DEFAULT_TIMEOUT_MS) {
   // Generic error message.
-  const errMsg = `Failed to search location (query='${query}').`;
+  const errMsg = `Failed to find destination '${destination}'.`;
 
   // We build the request URL.
-  const reqUrl = geoSearchMakeUrl(query, username);
-  console.log(`geoSearch: query='${query}'`);
+  // (Since we take the 1st result anyway, we set `maxRows` to 1.)
+  const reqUrl = geoSearchMakeUrl(destination, username, /*maxRows=*/ 1);
+  console.log(`getDestination: destination='${destination}'`);
 
   // We send the request to the API.
   try {
     // This may throw.
     const [res, resData] = await getData(reqUrl, timeoutMs);
-    console.log('geoSearch: res.status=', res.status, ', resData=', resData);
+    console.log('getDestination: res.status=', res.status, ', resData=', resData);
 
-    // 1. We check the HTTP status code.
+    // We check the HTTP status code.
     if (!res.ok || resData === null) {
-      // FIXME For now, map all errors to 500.
+      // We map all errors to 500.
       return [500, { message: errMsg }];
     }
 
-    // FIXME Do we need to check any internal field?
-    // 2. We check the API error code.
-    // return geoSearchCheckResponse(resData, errMsg);
+    // We check the response.
+    if (!resData.geonames.length) {
+      const errMsg = "No destination found. Please check your spelling and try again.";
+      return [404, { message: errMsg }];
+    }
 
-    return [200, resData];
+    const { lng, lat, name, countryName } = resData.geonames[0];
+    return [200, { lng, lat, name, countryName }];
   } catch (err) {
-    console.log('geoSearch: err:', err);
+    console.log('getDestination: err:', err);
     if (err.name == 'AbortError') {
       return [503, { message: errMsg }];
     } else {
@@ -156,7 +162,7 @@ async function geoSearch(query, username, timeoutMs = DEFAULT_TIMEOUT_MS) {
  * @param {express.Request} req the request.
  * @param {express.Response} res the response.
  */
-async function handleGeoSearch(req, res) {
+async function handleGetDestination(req, res) {
   console.log(`handleGeoSearch: req.body=${req.body}`);
   const result = validationResult(req);
   if (!result.isEmpty()) {
@@ -167,7 +173,7 @@ async function handleGeoSearch(req, res) {
     });
   } else {
     const reqData = matchedData(req);
-    const [resStatus, resData] = await geoSearch(reqData.query, geoSearchUsername);
+    const [resStatus, resData] = await getDestination(reqData.query, geoSearchUsername);
     res.status(resStatus).send(resData);
   }
   // Required for POST.
@@ -180,7 +186,7 @@ async function handleGeoSearch(req, res) {
  * @param {express.Request} req the request.
  * @param {express.Response} res the response.
  */
-async function handleGeoSearchTest(req, res) {
+async function handleGetDestinationTest(req, res) {
   console.log(`handleGeoSearchTest: req.body=${req.body}`);
   const result = validationResult(req);
   if (!result.isEmpty()) {
@@ -238,7 +244,7 @@ app.get('/', function (_req, res) {
  * Builds the validation chain to use for the 'analyze-sentiment' end-point.
  * @returns {import('express-validator').ValidationChain} as described above.
  */
-function validateGeoSearch() {
+function validateGetDestination() {
   return body('query')
     .isLength({
       min: 1,
@@ -248,12 +254,12 @@ function validateGeoSearch() {
     .withMessage('must be a valid location query');
 }
 
-app.post('/geo-search', [validateGeoSearch()], handleGeoSearch);
+app.post('/getDestination', [validateGetDestination()], handleGetDestination);
 
 // We only add test endpoints in development.
 if (runenv === 'development') {
   console.log('Adding test endpoints...');
-  app.post('/test/geo-search', [validateGeoSearch()], handleGeoSearchTest);
+  app.post('/test/getDestination', [validateGetDestination()], handleGetDestinationTest);
 }
 
 /* Server. */
