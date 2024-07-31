@@ -24,10 +24,20 @@ Content:
 
 Examples queries for the API:
 ```bash
-# Single result.
-curl -d '{"query":"Lamboing"}' -H "Content-Type: application/json" -X POST http://localhost:3000/geo-search
-# Mutiple results.
-curl -d '{"query":"Hamburg"}' -H "Content-Type: application/json" -X POST http://localhost:3000/geo-search
+# Get destination.
+curl -d '{"query": "Lamboing"}' -H "Content-Type: application/json" -X POST http://localhost:3000/geo-search
+# Get current weather.
+curl -d '{"lng": 7.13476, "lat": 47.11682, "numDays": 1}' -H "Content-Type: application/json" -X POST http://localhost:3000/getWeather
+# Get weather forecasts.
+curl -d '{"lng": 7.13476, "lat": 47.11682, "numDays": 2}' -H "Content-Type: application/json" -X POST http://localhost:3000/getWeather
+
+# Test destination.
+curl -d '{"query": "Lamboing"}' -H "Content-Type: application/json" -X POST http://localhost:3000/test/getDestination
+# Test current weather.
+curl -d '{"lng": 7.13476, "lat": 47.11682, "numDays": 1}' -H "Content-Type: application/json" -X POST http://localhost:3000/test/getWeather
+# Test weather forecasts.
+curl -d '{"lng": 7.13476, "lat": 47.11682, "numDays": 2}' -H "Content-Type: application/json" -X POST http://localhost:3000/test/getWeather
+
 ```
 
 <a id="instructions"></a>

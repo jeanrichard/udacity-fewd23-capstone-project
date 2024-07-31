@@ -74,6 +74,21 @@ function enableSubmit() {
   getSubmitButton().disabled = false;
 }
 
+/** Number of milliseconds in a day (24 hours). */
+const NUM_MS_PER_DAY = 24 * 60 * 60 * 1000;
+
+/**
+ * Returns the number of remaining days until a given date in the future.
+ * @param {string} dateStr the date. 
+ */
+function getNumRemainingDays(dateStr) {
+  // We get the current date and time.
+  const now = new Date();
+  const date = new Date(dateStr);
+  const differenceMs = date.getTime() - now.getTime();
+  return Math.ceil(differenceMs / NUM_MS_PER_DAY);
+}
+
 /*------------------------------------------------------------------------------------------------
  * Main part
  *------------------------------------------------------------------------------------------------*/
@@ -89,10 +104,16 @@ function enableSubmit() {
 const BACKEND_API_BASE_URL = 'http://localhost:3000';
 
 /**
- * Endpoint for sentiment analysis.
+ * API endpoint to search for a destination.
  */
-const GET_DESTINATION_ENDPOINT = `${BACKEND_API_BASE_URL}/getDestination`;
-// const GET_DESTINATION_ENDPOINT = `${BACKEND_API_BASE_URL}/test/getDestination`;
+// const GET_DESTINATION_ENDPOINT = `${BACKEND_API_BASE_URL}/getDestination`;
+const GET_DESTINATION_ENDPOINT = `${BACKEND_API_BASE_URL}/test/getDestination`;
+
+/**
+ * API endpoint to retrieve the weather forecast at a given location.
+ */
+// const GET_WEATHER_ENDPOINT = `${BACKEND_API_BASE_URL}/getWeather`;
+const GET_WEATHER_ENDPOINT = `${BACKEND_API_BASE_URL}/test/getWeather`;
 
 /**
  * Updates the UI.
@@ -119,9 +140,10 @@ function displayResults(trip) {
 }
 
 /**
- * Searches for a destination (currently using the GeoNames service).
+ * Searches for a destination.
  * Returns either `[true, resData]` or `[false, message]`.
  * @param {string} destination the destination to search for.
+ * @return {Promise<[boolean, any]>} FIXME
  */
 async function getDestination(destination) {
   // As an improvement, if `(err.name == 'AbortError')` we could retry with some backoff strategy.
@@ -149,6 +171,47 @@ async function getDestination(destination) {
 }
 
 /**
+ * FIXME
+ * @param {number} lng 
+ * @param {number} lat 
+ * @param {number} numDays
+ * @return {Promise<[boolean, any]>}} xxx
+ */
+async function getWeather(lng, lat, numDays) {
+  // As an improvement, if `(err.name == 'AbortError')` we could retry with some backoff strategy.
+
+  // Generic error message.
+  const errMsg = `Failed to get weather forecast for given location in ${numDays} day(s).`;
+
+  try {
+    const endpoint = GET_WEATHER_ENDPOINT;
+    console.log('getWeather: endpoint:', endpoint);
+
+    const [res, resData] = await postData(endpoint, { lng, lat, numDays });
+    console.log('getWeather: res.status=', res.status, ', resData=', resData);
+
+    // We check the HTTP status code.
+    if (!res.ok || resData === null) {
+      return [false, { message: errMsg }];
+    }
+
+    return [true, resData];
+  } catch (err) {
+    console.log('getWeather: err:', err);
+    return [false, { message: errMsg }];
+  }
+}
+
+/**
+ * 
+ * @param {string} destination 
+ * @returns 
+ */
+async function getDestinationPicture(destination) {
+  return [false, null];
+}
+
+/**
  * Handles the submit event:
  * 1) Validates inputs. (Displays an alert and stops if invalid.)
  * 2) Contact the backend API to (fixme). (Displays an alert and stops if error.)
@@ -173,19 +236,32 @@ export async function handleSubmit(event) {
   // @ts-ignore: Object is possibly 'null'.
   const date = document.getElementById('date').value;
 
+  // FIXME Validate inputs!
+
   console.log('date =', date, 'type =');
 
   try {
-    const [ok, resData] = await getDestination(destination);
-    console.log('after getDestination: ok=', ok, ', resData=', resData);
-
-    if (!ok) {
+    // Find the destination.
+    const [dstOk, dstData] = await getDestination(destination);
+    console.log('after getDestination: ok=', dstOk, ', resData=', dstData);
+    if (!dstOk) {
       // FIXME Need to display error.
       return;
     }
 
-    const { lng, lat, name, countryName } = resData;
-    console.log('after getDestination: lng=', lng, ', lat=', lat, ', name=', name, ', countryName=', countryName);
+    const { lng, lat, name, countryName } = dstData;
+
+    // Get the weather forecast.
+    const numRemainingDays = getNumRemainingDays(date);
+    const [wthOk, wthData] = await getWeather(lng, lat, numRemainingDays);
+    if (!dstOk) {
+      // FIXME Need to display error.
+      return;
+    }
+
+    // Get the destination picture.
+    // FIXME Use name resolved by GeoNames instead of query.
+    const [picOk, picData] = await getDestinationPicture(destination);
   }
   finally { }
 

@@ -1,0 +1,25 @@
+{
+  "totalResultsCount": 1,
+  "geonames": [
+    {
+      "adminCode1": "BE",
+      "lng": "7.13476",
+      "geonameId": 2660049,
+      "toponymName": "Lamboing",
+      "countryId": "2658434",
+      "fcl": "P",
+      "population": 617,
+      "countryCode": "CH",
+      "name": "Lamboing",
+      "fclName": "city, village,...",
+      "adminCodes1": {
+        "ISO3166_2": "BE"
+      },
+      "countryName": "Switzerland",
+      "fcodeName": "populated place",
+      "adminName1": "Bern",
+      "lat": "47.11682",
+      "fcode": "PPL"
+    }
+  ]
+}
