@@ -15,7 +15,7 @@ export default {
         use: ['html-loader'],
       },
       {
-        test: /\.png/,
+        test: /\.(png)$/,
         type: 'asset/resource',
       },
     ],

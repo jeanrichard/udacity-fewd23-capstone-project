@@ -13,3 +13,25 @@ section {
   max-width: 800px;
   margin: 50px auto;
 }
+
+.error-msg {
+  display: none;
+}
+
+.error-msg--active {
+  display: block;
+  color: red;
+
+  &::before {
+    content: '\24D8';
+    margin-right: 0.2em;
+  }
+}
+
+.trips-container {
+  display: none;
+}
+
+.trips-container.trips-container--nonempty {
+  display: block;
+}

@@ -25,11 +25,7 @@
       "slp": 1016,
       "snow": 0,
       "solar_rad": 150.5,
-      "sources": [
-        "analysis",
-        "radar",
-        "satellite"
-      ],
+      "sources": ["analysis", "radar", "satellite"],
       "state_code": "BE",
       "station": "D0224",
       "sunrise": "04:12",

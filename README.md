@@ -23,6 +23,7 @@ Content:
 - [6. How to use Dev Containers](#how-to-use-dev-containers)
 
 Examples queries for the API:
+
 ```bash
 # Get destination.
 curl -d '{"query": "Lamboing"}' -H "Content-Type: application/json" -X POST http://localhost:3000/geo-search

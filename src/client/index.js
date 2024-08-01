@@ -1,9 +1,11 @@
 import { isValidDate } from './js/date-checker';
 import { handleAbout } from './js/about-handler';
 import { handleSubmit } from './js/form-handler';
+import * as typedefs from './js/typedefs';
 
 // Webpack magic.
 import './icons/logo.png';
+import './images/no-image-available_1024x1024.png';
 import './styles/resets.scss';
 import './styles/base.scss';
 import './styles/footer.scss';

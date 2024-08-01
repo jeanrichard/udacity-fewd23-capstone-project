@@ -19,17 +19,20 @@
 
     <main>
       <section>
-        <form class="" onsubmit="return clientlib.handleSubmit(event)">
+        <form class="" id="input-form" onsubmit="return clientlib.handleSubmit(event)">
           <label for="destination"> Destination</label>
           <input
             id="destination"
             name="destination"
             placeholder="Enter your destination"
+            required
             type="text"
             value=""
           />
+          <div class="error-msg" id="destination-error"></div>
           <label for="date">Date</label>
-          <input id="date" name="date" type="date" />
+          <input id="date" name="date" required type="date" />
+          <div class="error-msg" id="date-error"></div>
           <input
             id="submit-btn"
             name="submit-btn"
@@ -37,25 +40,34 @@
             type="submit"
             value="Submit"
           />
+          <div class="error-msg" id="submit-error"></div>
         </form>
       </section>
       <section>
-        <h2>Trips</h2>
-        <div id="trips"></div>
+        <div class="trips-container">
+          <h2>Trips</h2>
+          <div id="trips"></div>
+        </div>
 
         <!-- Trip template. -->
         <template id="trip-template">
           <div class="trip-details">
-            <p class="overview">
-              My trip to <span class="location"></span>, <span class="country"></span>, is
-              <span class="num-days-remaining"></span> day(s) away.
+            <p class="destination">
+              My trip to <span class="name"></span>, <span class="country-name"></span>, is
+              <span class="num-days"></span> day(s) away.
             </p>
-            <p class="weather">
-              Typical weather for then is: High: <span class="temp-hi"></span>°C, Low:
-              <span class="temp-lo"></span>, <span class="weather-desc"></span>
+            <p class="weather-current">
+              Current weather is: <span class="temp"></span>&deg;C.
+              <span class="weather-desc"></span>.
+              <span class="weather-icon">placeholder</span>
             </p>
-            <div class="location-pic">
-            </div>
+            <p class="weather-forecasts">
+              Typical weather for then is: <span class="temp"></span>&deg;C (max:
+              <span class="temp-max"></span>&deg;C, min: <span class="temp-min"></span>&deg;C).
+              <span class="weather-desc"></span>.
+              <span class="weather-icon">placeholder</span>
+            </p>
+            <div class="location-pic"></div>
           </div>
         </template>
       </section>
