@@ -20,7 +20,7 @@ import * as typedefs from './typedefs.mjs';
 const GEONAMES_SEARCH_API_BASE_URL = 'https://secure.geonames.org/searchJSON';
 
 /**
- * Builds the request URL to do a geo-search.
+ * Builds the request URL to find the destination.
  * 
  * See the {@link https://www.geonames.org/export/geonames-search.html |GeoNames Search API documentation}.
  *
@@ -52,7 +52,7 @@ function getDestinationMakeUrl(q, username, maxRows = 10) {
  * Checks response data and returns a suitable result object.
  * 
  * @param {any} resData data sent by the GeoNames Search API.
- * @returns {[number, typedefs.DestinationResult]} a pair (http-status, error-or-result)..
+ * @returns {[number, typedefs.DestinationResult]} a pair (http-status, error-or-result).
  */
 function checkAndExtractDestination(resData) {
   // We check the response.
@@ -72,22 +72,22 @@ function checkAndExtractDestination(resData) {
 }
 
 /**
- * Uses the GeoNames Search API to find a location.
+ * Uses the GeoNames Search API to find the destination.
  *
- * @param {string} destination the query.
- * @param {string} username the username to use with the API.
+ * @param {string} dest the query.
+ * @param {string} username the username to authenticate with the API.
  * @param {number} timeoutMs the timeout, in ms (optional).
  * @returns {Promise<[number, typedefs.DestinationResult]>} a pair (http-status, error-or-result).
  */
-export async function getDestination(destination, username, timeoutMs = utils.DEFAULT_TIMEOUT_MS) {
-  console.log('getDestination: destination =', destination, ', username =', username);
+export async function getDestination(dest, username, timeoutMs = utils.DEFAULT_TIMEOUT_MS) {
+  console.log('getDestination: dest =', dest, ', username =', /*username*/ 'redacted');
 
   // Generic error message.
-  const errMsg = `Failed to find destination '${destination}'.`;
+  const errMsg = `Failed to find destination for query '${dest}'.`;
 
   // We build the request URL.
-  // (Since we take the 1st result anyway, we set `maxRows` to 1.)
-  const reqUrl = getDestinationMakeUrl(destination, username, /*maxRows=*/ 1);
+  // (Since we take the 1st result, we set `maxRows` to 1.)
+  const reqUrl = getDestinationMakeUrl(dest, username, /*maxRows=*/ 1);
   // console.log('getDestination: reqUrl =', reqUrl); // Careful: URL contains credentials.
 
   // We send the request to the API.
@@ -116,7 +116,7 @@ export async function getDestination(destination, username, timeoutMs = utils.DE
 }
 
 /*------------------------------------------------------------------------------------------------
- * Canned data for testing
+ * Canned data for E2E testing
  *------------------------------------------------------------------------------------------------*/
 
 /**

@@ -9,7 +9,20 @@ import * as utils from './utils.mjs';
 import * as typedefs from './typedefs.mjs';
 
 /*------------------------------------------------------------------------------------------------
- * Integrating the WeatherBit API
+ * Utilities
+ *------------------------------------------------------------------------------------------------*/
+
+/**
+ * Returns the URL to access a given icon.
+ * @param {string} icon the name of the icon.
+ * @returns as described above.
+ */
+function getIconUrl(icon) {
+  return `https://cdn.weatherbit.io/static/img/icons/${icon}.png`;
+}
+
+/*------------------------------------------------------------------------------------------------
+ * Integrating the Current Weather API
  *------------------------------------------------------------------------------------------------*/
 
 /**
@@ -18,27 +31,13 @@ import * as typedefs from './typedefs.mjs';
 const WEATHEBIT_CURRENT_BASE_URL = 'https://api.weatherbit.io/v2.0/current';
 
 /**
- * Base URL of the WeatherBit Weather Forecasts API.
- */
-const WEATHEBIT_FORECASTS_BASE_URL = 'https://api.weatherbit.io/v2.0/forecast/daily';
-
-/**
- * Returns the URL to access the given icon.
- * @param {string} icon the name of the icon.
- * @returns as described above.
- */
-function getIconUrl(icon) {
-  return `https://cdn.weatherbit.io/static/img/icons/${icon}.png`;
-}
-
-/**
- * Builds the request URL to get the current weather.
+ * Builds the request URL to get the current weather for a given location.
  * 
  * See the {@link https://www.weatherbit.io/api/weather-current |Current Weather API documentation}.
  * 
  * @param {number} lon the lon coordinate.
  * @param {number} lat the lat coordinate.
- * @param {string} apiKey the API key to use.
+ * @param {string} apiKey the API key to use with the API.
  * @returns {string} as described above.
  */
 function getWeatherCurrentMakeUrl(lon, lat, apiKey) {
@@ -54,32 +53,10 @@ function getWeatherCurrentMakeUrl(lon, lat, apiKey) {
 }
 
 /**
- * Builds the request URL to get the weather forecast.
- * 
- * See the {@link https://www.weatherbit.io/api/weather-forecast-16-day |Weather Forecast API documentation}.
- *
- * @param {number} lon the lon coordinate.
- * @param {number} lat the lat coordinate.
- * @param {string} apiKey the API key to use.
- * @returns {string} as described above.
- */
-function getWeatherForecastsMakeUrl(lon, lat, apiKey) {
-  const reqUrlObj = new URL(WEATHEBIT_FORECASTS_BASE_URL);
-  reqUrlObj.search = new URLSearchParams([
-    ['key', apiKey],
-    ['lang', 'en'], // English.
-    ['units', 'M'], // Metric units.
-    ['lat', lat.toFixed(5)],
-    ['lon', lon.toFixed(5)],
-  ]).toString();
-  return reqUrlObj.toString();
-}
-
-/**
  * Checks response data and returns a suitable result object.
  * 
  * @param {any} resData data sent by the WeatherBit Current Weather API.
- * @returns {[number, typedefs.WeatherResult]} a pair (http-status, error-or-result)..
+ * @returns {[number, typedefs.WeatherResult]} a pair (http-status, error-or-result).
  */
 function checkAndExtractWeatherCurrent(resData) {
   // We check the response.
@@ -106,42 +83,11 @@ function checkAndExtractWeatherCurrent(resData) {
 }
 
 /**
- * Checks response data and returns a suitable result object.
- * 
- * @param {any} resData data sent by the WeatherBit Current Weather API.
- * @returns {[number, typedefs.WeatherResult]} a pair (http-status, error-or-result)..
- */
-function checkAndExtractWeatherForecast(resData) {
-  // We check the response.
-  if (resData.data === null || resData.data.length === 0) {
-    // This should not be possible.
-    const errMsg = 'No weather forecast available for given location.';
-    return [404, { message: errMsg }];
-  }
-
-  // We extract the needed fields and prepare the response.
-  // We take the last one (furthest in the future).
-  const record = resData.data[resData.data.length - 1];
-  return [
-    200,
-    {
-      temp: record.temp,
-      tempMin: record.min_temp,
-      tempMax: record.max_temp,
-      weather: {
-        desc: record.weather.description,
-        iconUrl: getIconUrl(record.weather.icon),
-      },
-    },
-  ];
-}
-
-/**
  * Returns the current weather for a given location.
  * 
  * @param {number} lng the lon coordinate.
  * @param {number} lat the lat coordinate.
- * @param {string} apiKey the API key to use.
+ * @param {string} apiKey the API key to use with the API.
  * @param {number} timeoutMs the timeout, in ms (optional).
  * @returns {Promise<[number, typedefs.WeatherResult]>}  a pair (http-status, error-or-result).
  */
@@ -179,6 +125,68 @@ async function getWeatherCurrent(lng, lat, apiKey, timeoutMs = utils.DEFAULT_TIM
   }
 }
 
+/*------------------------------------------------------------------------------------------------
+ * Integrating the Weather Forecasts API
+ *------------------------------------------------------------------------------------------------*/
+
+/**
+ * Base URL of the WeatherBit Weather Forecasts API.
+ */
+const WEATHEBIT_FORECASTS_BASE_URL = 'https://api.weatherbit.io/v2.0/forecast/daily';
+
+/**
+ * Builds the request URL to get the weather forecast for a given location.
+ * 
+ * See the {@link https://www.weatherbit.io/api/weather-forecast-16-day |Weather Forecast API documentation}.
+ *
+ * @param {number} lon the lon coordinate.
+ * @param {number} lat the lat coordinate.
+ * @param {string} apiKey the API key to use with the API.
+ * @returns {string} as described above.
+ */
+function getWeatherForecastMakeUrl(lon, lat, apiKey) {
+  const reqUrlObj = new URL(WEATHEBIT_FORECASTS_BASE_URL);
+  reqUrlObj.search = new URLSearchParams([
+    ['key', apiKey],
+    ['lang', 'en'], // English.
+    ['units', 'M'], // Metric units.
+    ['lat', lat.toFixed(5)],
+    ['lon', lon.toFixed(5)],
+  ]).toString();
+  return reqUrlObj.toString();
+}
+
+/**
+ * Checks response data and returns a suitable result object.
+ * 
+ * @param {any} resData data sent by the WeatherBit Weather Forecasts API.
+ * @returns {[number, typedefs.WeatherResult]} a pair (http-status, error-or-result).
+ */
+function checkAndExtractWeatherForecast(resData) {
+  // We check the response.
+  if (resData.data === null || resData.data.length === 0) {
+    // This should not be possible.
+    const errMsg = 'No weather forecast available for given location.';
+    return [404, { message: errMsg }];
+  }
+
+  // We extract the result.
+  // We take the last record (furthest in the future).
+  const record = resData.data[resData.data.length - 1];
+  return [
+    200,
+    {
+      temp: record.temp,
+      tempMin: record.min_temp,
+      tempMax: record.max_temp,
+      weather: {
+        desc: record.weather.description,
+        iconUrl: getIconUrl(record.weather.icon),
+      },
+    },
+  ];
+}
+
 /**
  * Returns the weather forecast for a given location.
  * 
@@ -186,24 +194,24 @@ async function getWeatherCurrent(lng, lat, apiKey, timeoutMs = utils.DEFAULT_TIM
  * 
  * @param {number} lng the lon coordinate.
  * @param {number} lat the lat coordinate.
- * @param {string} apiKey the API key to use.
+ * @param {string} apiKey the API key to use with the API.
  * @param {number} timeoutMs the timeout, in ms (optional).
  * @returns {Promise<[number, typedefs.WeatherResult]>}  a pair (http-status, error-or-result).
  */
-async function getWeatherForecasts(lng, lat, apiKey, timeoutMs = utils.DEFAULT_TIMEOUT_MS) {
-  console.log('getWeatherForecasts: lng=', lng, 'lat=', lat, 'apiKey=', /*apiKey*/ 'redacted');
+async function getWeatherForecast(lng, lat, apiKey, timeoutMs = utils.DEFAULT_TIMEOUT_MS) {
+  console.log('getWeatherForecast: lng=', lng, 'lat=', lat, 'apiKey=', /*apiKey*/ 'redacted');
 
   // Generic error message.
-  const errMsg = 'Failed to get weather forecasts for given location.';
+  const errMsg = 'Failed to get weather forecast for given location.';
 
-  const reqUrl = getWeatherForecastsMakeUrl(lng, lat, apiKey);
+  const reqUrl = getWeatherForecastMakeUrl(lng, lat, apiKey);
   // console.log('getWeatherForecasts: reqUrl=', reqUrl); // Careful: URL contains credentials.
 
   // We send the request to the API.
   try {
     // This may throw.
     const [res, resData] = await utils.getData(reqUrl, timeoutMs);
-    console.log('getWeatherForecasts: res.status =', res.status, ', resData =', /*resData*/ 'omitted');
+    console.log('getWeatherForecast: res.status =', res.status, ', resData =', /*resData*/ 'omitted');
 
     // We check the HTTP status code.
     if (!res.ok || resData === null) {
@@ -214,7 +222,7 @@ async function getWeatherForecasts(lng, lat, apiKey, timeoutMs = utils.DEFAULT_T
     // We check the response and extract the result.
     return checkAndExtractWeatherForecast(resData);
   } catch (err) {
-    console.log('getWeatherForecasts: err =', err);
+    console.log('getWeatherForecast: err =', err);
     if (err.name == 'AbortError') {
       return [503, { message: errMsg }];
     } else {
@@ -224,15 +232,19 @@ async function getWeatherForecasts(lng, lat, apiKey, timeoutMs = utils.DEFAULT_T
   }
 }
 
+/*------------------------------------------------------------------------------------------------
+ * Integrating the WeatherBit API
+ *------------------------------------------------------------------------------------------------*/
+
 /**
- * Returns the current weather if `numDays` is ≤ 1`; returns the weather forecast otherwise.
+ * Returns the current weather if `numDays` is ≤ 1; returns the weather forecast otherwise.
  * 
  * Note: We get only 7 days in the future with the Free plan.
  *
  * @param {number} lng the lon coordinate.
  * @param {number} lat the lat coordinate.
  * @param {number} numDays the desired number of days in the future.
- * @param {string} apiKey the API key to use.
+ * @param {string} apiKey the API key to use with the API.
  * @param {number} timeoutMs the timeout, in ms (optional).
  * @returns {Promise<[number, typedefs.WeatherResult]>}  a pair (http-status, error-or-result).
  */
@@ -251,12 +263,12 @@ export async function getWeather(lng, lat, numDays, apiKey, timeoutMs = utils.DE
   if (numDays <= 1) {
     return getWeatherCurrent(lng, lat, apiKey, timeoutMs);
   } else {
-    return getWeatherForecasts(lng, lat, apiKey, timeoutMs);
+    return getWeatherForecast(lng, lat, apiKey, timeoutMs);
   }
 }
 
 /*------------------------------------------------------------------------------------------------
- * Canned data for testing
+ * Canned data for E2E testing
  *------------------------------------------------------------------------------------------------*/
 
 /**

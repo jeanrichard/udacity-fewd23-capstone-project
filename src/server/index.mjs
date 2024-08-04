@@ -32,8 +32,24 @@ const envProperties = [
 ];
 
 /*------------------------------------------------------------------------------------------------
- * Handlers
+ * Handlers for destination
  *------------------------------------------------------------------------------------------------*/
+
+/**
+ * Builds the validation chain to use for the 'getDestination' end-point.
+ * @returns {Array<import('express-validator').ValidationChain>} as described above.
+ */
+function validateGetDestination() {
+  return [
+    body('query')
+      .isLength({
+        min: 1,
+        max: 256,
+      })
+      .trim()
+      .withMessage('must be a valid location query'),
+  ];
+}
 
 /**
  * Handles a request to find a destination.
@@ -62,7 +78,7 @@ async function handleGetDestination(req, res) {
 }
 
 /**
- * (Testing) Behaves exactly like 'handleGeoSearch' but returns canned data.
+ * (E2E testing) Behaves exactly like 'handleGetDestination' but returns canned data.
  *
  * @param {express.Request} req the request.
  * @param {express.Response} res the response.
@@ -85,8 +101,41 @@ async function handleGetDestinationTest(req, res) {
   res.end();
 }
 
+/*------------------------------------------------------------------------------------------------
+ * Handlers for weather
+ *------------------------------------------------------------------------------------------------*/
+
 /**
- * Handles a request to get the current weather / weather forecast for a given location.
+ * Builds the validation chain to use for the 'getWeather' end-point.
+ * @returns {Array<import('express-validator').ValidationChain>} as described above.
+ */
+function validateGetWeather() {
+  return [
+    body('lon')
+      .isFloat({
+        min: -180.0,
+        max: +180.0,
+      })
+      .toFloat()
+      .withMessage('must be a floating point number in range [-180, 180]'),
+    body('lat')
+      .isFloat({
+        min: -90.0,
+        max: +90.0,
+      })
+      .toFloat()
+      .withMessage('must be a floating point number in range [-90, 90]'),
+    body('numDays')
+      .isInt({
+        min: 0,
+      })
+      .toInt()
+      .withMessage('must be a non-negative integer'),
+  ];
+}
+
+/**
+ * Handles a request to get the weather for a given location.
  * 
  * Note: We return a '400 - Bad Request' if the request fails validation.
  *
@@ -119,7 +168,7 @@ async function handleGetWeather(req, res) {
 }
 
 /**
- * (Testing) Behaves exactly like 'handleGetWeather' but returns canned data.
+ * (E2E testing) Behaves exactly like 'handleGetWeather' but returns canned data.
  *
  * @param {express.Request} req the request.
  * @param {express.Response} res the response.
@@ -143,8 +192,23 @@ async function handleGetWeatherTest(req, res) {
   res.end();
 }
 
+/*------------------------------------------------------------------------------------------------
+ * Handlers for picture
+ *------------------------------------------------------------------------------------------------*/
+
 /**
- * Handles a request to get FIXME.
+ * Builds the validation chain to use for the 'getPicture' end-point.
+ * @returns {Array<import('express-validator').ValidationChain>} as described above.
+ */
+function validateGetPicture() {
+  return [
+    body('name').isString().notEmpty().withMessage('must be a non-empty string'),
+    body('countryName').isString().withMessage('must be a string'),
+  ];
+}
+
+/**
+ * Handles a request to find a picture for a location.
  * 
  * Note: We return a '400 - Bad Request' if the request fails validation.
  *
@@ -164,6 +228,33 @@ async function handleGetPicture(req, res) {
     const reqData = matchedData(req);
     const [resStatus, resData] = await getPicture(reqData.name, reqData.countryName, pixabayApiKey);
     console.log('handleGetPicture: resStatus=', resStatus, ', resData=', resData);
+    res.status(resStatus).send(resData);
+  }
+  // Required for POST.
+  res.end();
+}
+
+/**
+ * (E2E Testing) Behaves exactly like 'handleGetPicture' but returns canned data.
+ * 
+ * Note: We return a '400 - Bad Request' if the request fails validation.
+ *
+ * @param {express.Request} req the request.
+ * @param {express.Response} res the response.
+ */
+async function handleGetPictureTest(req, res) {
+  console.log('handleGetPictureTest: req.body=', req.body);
+  const result = validationResult(req);
+  if (!result.isEmpty()) {
+    // There are validation errors.
+    res.status(400).send({
+      message: 'Invalid argument(s).',
+      errors: result.array(),
+    });
+  } else {
+    const reqData = matchedData(req);
+    const [resStatus, resData] = await getPictureTest();
+    console.log('handleGetPictureTest: resStatus=', resStatus, ', resData=', resData);
     res.status(resStatus).send(resData);
   }
   // Required for POST.
@@ -207,66 +298,8 @@ app.get('/', function (_req, res) {
   res.sendFile('dist/index.html');
 });
 
-/**
- * Builds the validation chain to use for the 'getDestination' end-point.
- * @returns {Array<import('express-validator').ValidationChain>} as described above.
- */
-function validateGetDestination() {
-  return [
-    body('query')
-      .isLength({
-        min: 1,
-        max: 256,
-      })
-      .trim()
-      .withMessage('must be a valid location query'),
-  ];
-}
-
 app.post('/getDestination', validateGetDestination(), handleGetDestination);
-
-/**
- * Builds the validation chain to use for the 'getWeather' end-point.
- * @returns {Array<import('express-validator').ValidationChain>} as described above.
- */
-function validateGetWeather() {
-  return [
-    body('lon')
-      .isFloat({
-        min: -180.0,
-        max: +180.0,
-      })
-      .toFloat()
-      .withMessage('must be a floating point number in range [-180, 180]'),
-    body('lat')
-      .isFloat({
-        min: -90.0,
-        max: +90.0,
-      })
-      .toFloat()
-      .withMessage('must be a floating point number in range [-90, 90]'),
-    body('numDays')
-      .isInt({
-        min: 0,
-      })
-      .toInt()
-      .withMessage('must be a non-negative integer'),
-  ];
-}
-
 app.post('/getWeather', validateGetWeather(), handleGetWeather);
-
-/**
- * Builds the validation chain to use for the 'getPicture' end-point.
- * @returns {Array<import('express-validator').ValidationChain>} as described above.
- */
-function validateGetPicture() {
-  return [
-    body('name').isString().notEmpty().withMessage('must be a non-empty string'),
-    body('countryName').isString().withMessage('must be a string'),
-  ];
-}
-
 app.post('/getPicture', validateGetPicture(), handleGetPicture);
 
 // We only add test endpoints in development.
@@ -274,6 +307,7 @@ if (runenv === 'development') {
   console.log('Adding test endpoints...');
   app.post('/test/getDestination', validateGetDestination(), handleGetDestinationTest);
   app.post('/test/getWeather', validateGetWeather(), handleGetWeatherTest);
+  app.post('/test/getPicture', validateGetPicture(), handleGetPictureTest);
 }
 
 /* Server. */
@@ -288,13 +322,12 @@ const server = app.listen(PORT, () => {
   let closeServer = false;
   for (const [name, value] of envProperties) {
     if (value === '') {
-      console.log(
-        ['ERROR:', `Environment variable '${name}' is not set or empty.`, 'Stopping.'].join(' '),
-      );
+      console.log(`ERROR: Environment variable '${name}' is not set or empty.`);
       closeServer = true;
     }
   }
   if (closeServer) {
+    console.log('ERROR: Stopping.');
     server.close();
   }
 });

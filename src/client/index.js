@@ -1,7 +1,6 @@
-import { isValidDate } from './js/date-checker';
-import { handleAbout } from './js/about-handler';
-import { handleSubmit } from './js/form-handler';
-import * as typedefs from './js/typedefs';
+
+import { handleAbout } from './js/handler-about';
+import { handleSubmit } from './js/handler-form';
 
 // Webpack magic.
 import './icons/logo.png';
@@ -28,4 +27,4 @@ import './styles/header.scss';
 //   });
 // }
 
-export { isValidDate, handleAbout, handleSubmit };
+export { handleAbout, handleSubmit };

@@ -18,12 +18,12 @@ import * as typedefs from './typedefs.mjs';
 const PIXABAY_API_BASE_URL = 'https://pixabay.com/api/';
 
 /**
- * Builds the request URL to get a picture.
+ * Builds the request URL to find a picture.
  * 
  * See the {@link https://pixabay.com/service/about/api/ |Pixabay API documentation}.
  * 
  * @param {string} q the query.
- * @param {string} apiKey the API key to use.
+ * @param {string} apiKey the API key to use with the API.
  * @returns {string} as described above.
  */
 function getPictureMakeUrl(q, apiKey) {
@@ -43,8 +43,8 @@ function getPictureMakeUrl(q, apiKey) {
 /**
  * Checks response data and returns a suitable result object.
  * 
- * @param {any} resData data sent by the GeoNames Search API.
- * @returns {[number, typedefs.PictureResult]} a pair (http-status, error-or-result)..
+ * @param {any} resData data sent by the Pixabay API.
+ * @returns {[number, typedefs.PictureResult]} a pair (http-status, error-or-result).
  */
 function checkAndExtractPicture(resData) {
   // We check the response.
@@ -62,11 +62,11 @@ function checkAndExtractPicture(resData) {
 }
 
 /**
- * Uses the Pixabay API to find a location.
+ * Uses the Pixabay API to find a picture.
  * 
  * @param {string} name the destination name.
  * @param {string} countryName the destination country name.
- * @param {string} apiKey the API key to use.
+ * @param {string} apiKey the API key to use with the API.
  * @param {number} timeoutMs the timeout, in ms (optional).
  * @returns {Promise<[number, typedefs.PictureResult]>}  a pair (http-status, error-or-result).
  */
@@ -114,7 +114,7 @@ export async function getPicture(name, countryName, apiKey, timeoutMs = utils.DE
 }
 
 /*------------------------------------------------------------------------------------------------
- * Canned data for testing
+ * Canned data for E2E testing
  *------------------------------------------------------------------------------------------------*/
 
 /**

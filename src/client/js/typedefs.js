@@ -1,9 +1,11 @@
 // @ts-check
 'use strict';
 
+// WARNING: Copied from 'server/typedefs.mjs'. Should be kept in sync.
+
 /**
  * Generic error.
- * @typedef {Object} Error
+ * @typedef {Object} ApiError
  * @property {string} message an error message.
  */
 
@@ -22,7 +24,7 @@
 
 /**
  * Destination result.
- * @typedef {Error|DestinationSuccess} DestinationResult
+ * @typedef {ApiError|DestinationSuccess} DestinationResult
  */
 
 /*------------------------------------------------------------------------------------------------
@@ -47,7 +49,7 @@
 
 /**
  * Weather result.
- * @typedef {Error|WeatherSuccess} WeatherResult
+ * @typedef {ApiError|WeatherSuccess} WeatherResult
  */
 
 /*------------------------------------------------------------------------------------------------
@@ -62,7 +64,7 @@
 
 /**
  * Picture result.
- * @typedef {Error|PictureSuccess} PictureResult
+ * @typedef {ApiError|PictureSuccess} PictureResult
  */
 
 export { }
