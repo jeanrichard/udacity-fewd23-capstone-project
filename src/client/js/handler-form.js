@@ -7,6 +7,9 @@ import * as luxon from 'luxon';
 // Project.
 import { getDestination, getWeather, getPicture } from './utils-api';
 import * as formUtils from './handler-form-utils';
+import * as typedefs from './typedefs';
+import * as utils from './utils';
+
 // @ts-ignore: Cannot find module ... .
 import imagePlaceholder from '../images/no-image-available_1024x1024.png';
 
@@ -14,92 +17,115 @@ import imagePlaceholder from '../images/no-image-available_1024x1024.png';
  * Utilities
  *------------------------------------------------------------------------------------------------*/
 
+const MAX_YEARS_FROM_NOW = 100;
+
 /**
- * Returns the number of remaining days until a given date.
- * @param {luxon.DateTime} date the given date.
- * @param {luxon.DateTime} now the current date.
+ * Validate the destination provided by the user.
+ * 
+ * @param {string} destStr the query.
+ * @returns {[boolean, string|string]} a pair (isValid, error-or-result).
  */
-function getNumRemainingDays(date, now) {
-  return Math.ceil(date.diff(now, 'days').days);
+function validateDestination(destStr) {
+  const destTrimmed = destStr.trim();
+  if (destTrimmed === '') {
+    const errMsg = 'Destination cannot be emtpy. Please, enter a destination.';
+    return [false, errMsg];
+  } else {
+    const result = destTrimmed;
+    return [true, result];
+  }
+}
+
+/**
+ * Validate the date provided by the user.
+ * 
+ * @param {string} dateStr the date (in ISO format).
+ * @param {luxon.DateTime} now the current date.
+ * @returns {[boolean, string|luxon.DateTime]} a pair (isValid, error-or-result).
+ */
+function validateDate(dateStr, now) {
+  const dateTrimmed = dateStr.trim();
+  if (dateTrimmed === '') {
+    const errMsg = 'Date cannot be empty. Please, enter a date.';
+    return [false, errMsg];
+  } else {
+    const date = luxon.DateTime.fromISO(dateTrimmed);
+    // See https://github.com/moment/luxon/blob/master/docs/validity.md.
+    if (!date.isValid) {
+      const errMsg = 'Date is invalid. Please, enter a valid date.';
+      return [false, errMsg];
+    } else if (date < now) {
+      const errMsg = 'Date cannot be in the past. Please, enter a valid date.';
+      return [false, errMsg];
+    } else if (date > now.plus({ years: MAX_YEARS_FROM_NOW })) {
+      const errMsg = `Date cannot be more than ${MAX_YEARS_FROM_NOW} year(s) from now. Please, enter a valid date.`;
+      return [false, errMsg];
+    } else {
+      const result = date;
+      return [true, result];
+    }
+  }
 }
 
 /*------------------------------------------------------------------------------------------------
  * Main part
  *------------------------------------------------------------------------------------------------*/
 
-const MAX_YEARS_FROM_NOW = 100;
-
 /**
- * Validates the inputs provided by the user and shows errors where needed. If the inputs are
- * valid, returns a tuple `[true, dest, date]`, where the destination and date have been sanitized.
- * Otherwise, returns a tuple `[false, dest, date]`, where the destination and/or date are `null`.
+ * Validates the inputs provided by the user and shows errors where needed.
+ * 
+ * If one or more inputs are invalid, returns a tuple `[false, null, null]`. Otherwise, returns a
+ * tuple `[true, dest, date]`.
  * 
  * @param {string} destStr the query.
  * @param {string} dateStr the date (in ISO format).
  * @param {luxon.DateTime} now the current date.
- * @return {[boolean, string|null, luxon.DateTime|null]} as described above.
+ * @return {[boolean, null|string, null|luxon.DateTime]} as described above.
  */
 function validateInputs(destStr, dateStr, now) {
   // We validate as many input fields as possible in one pass.
 
   // Validate the destination.
-  const destTrimmed = destStr.trim();
-  let destIsValid = true;
-  let destMsg = '';
-  let destResult = null;
-  if (destTrimmed === '') {
-    destIsValid = false;
-    destMsg = 'Destination cannot be emtpy. Please, enter a destination.';
-  } else {
-    destResult = destTrimmed;
-  }
+  const [destIsValid, errOrDest] = validateDestination(destStr);
   if (!destIsValid) {
-    formUtils.showErrorDestination(destMsg);
+    /** @type {string} */
+    const destErrMsg = errOrDest;
+    formUtils.showErrorDestination(destErrMsg);
   } else {
     formUtils.clearErrorDestination();
   }
 
   // Validate the date.
-  const dateTrimmed = dateStr.trim();
-  let dateIsValid = true;
-  let dateMsg = '';
-  let dateResult = null;
-  if (dateTrimmed === '') {
-    dateIsValid = false;
-    dateMsg = 'Date cannot be empty. Please, enter a date.';
-  } else {
-    const date = luxon.DateTime.fromISO(dateTrimmed);
-    // See https://github.com/moment/luxon/blob/master/docs/validity.md.
-    if (!date.isValid) {
-      dateIsValid = false;
-      dateMsg = 'Date is invalid. Please, enter a valid date.';
-    } else if (date < now) {
-      dateIsValid = false;
-      dateMsg = 'Date cannot be in the past. Please, enter a valid date.';
-    } else if (date > now.plus({ years: MAX_YEARS_FROM_NOW })) {
-      dateIsValid = false;
-      dateMsg = `Date cannot be more than ${MAX_YEARS_FROM_NOW} year(s) from now. Please, enter a valid date.`;
-    } else {
-      dateResult = date;
-    }
-  }
+  const [dateIsValid, errOrDate] = validateDate(dateStr, now);
   if (!dateIsValid) {
-    formUtils.showErrorDate(dateMsg);
+    /** @type {string} */
+    // @ts-ignore: Type 'string | ...' is not assignable to ... .
+    const dateErrMsg = errOrDate;
+    formUtils.showErrorDestination(dateErrMsg);
   } else {
-    formUtils.clearErrorDate();
+    formUtils.clearErrorDestination();
   }
 
   const isValid = destIsValid && dateIsValid;
-  return [isValid, destResult, dateResult];
+  if (!isValid) {
+    return [isValid, null, null];
+  } else {
+    /** @type {string} */
+    const dest = errOrDest;
+    /** @type {luxon.DateTime} */
+    // @ts-ignore: Type 'string | ...' is not assignable to ... .
+    const date = errOrDate;
+    return [isValid, dest, date];
+  }
 }
 
 /**
  * Updates the UI.
  *
  * @param {number} numDays 
- * @param {*} dstData 
- * @param {*} wthData 
- * @param {*} picData 
+ * @param {typedefs.DestinationSuccess} dstData 
+ * @param {typedefs.WeatherSuccess} wthData 
+ * @param {typedefs.PictureSuccess} picData 
  */
 function updateUI(numDays, dstData, wthData, picData) {
   // 1. Retrieve the template and clone it.
@@ -218,7 +244,7 @@ export async function handleSubmit(event) {
     const date = dateOpt;
 
     // Compute the number of days remaining.
-    const numDays = getNumRemainingDays(date, now);
+    const numDays = utils.getNumRemainingDays(date, now);
 
     // Find the destination.
     const [dstOk, dstData] = await getDestination(destStr);

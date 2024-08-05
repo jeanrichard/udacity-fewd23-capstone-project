@@ -1,6 +1,9 @@
 // @ts-check
 'use strict';
 
+// 3rd Party.
+import * as luxon from 'luxon';
+
 /*------------------------------------------------------------------------------------------------
  * Constants
  *------------------------------------------------------------------------------------------------*/
@@ -14,6 +17,15 @@ const DEFAULT_TIMEOUT_MS = 5_000; // 5 seconds.
 /*------------------------------------------------------------------------------------------------
  * Utilities
  *------------------------------------------------------------------------------------------------*/
+
+/**
+ * Returns the number of remaining days until a given date.
+ * @param {luxon.DateTime} date the given date.
+ * @param {luxon.DateTime} now the current date.
+ */
+export function getNumRemainingDays(date, now) {
+  return Math.ceil(date.diff(now, 'days').days);
+}
 
 /**
  * Sends a POST request, and returns a pair (response, deserialized-JSON).
