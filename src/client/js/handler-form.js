@@ -14,60 +14,6 @@ import * as utils from './utils';
 import imagePlaceholder from '../images/no-image-available_1024x1024.png';
 
 /*------------------------------------------------------------------------------------------------
- * Utilities
- *------------------------------------------------------------------------------------------------*/
-
-const MAX_YEARS_FROM_NOW = 100;
-
-/**
- * Validate the destination provided by the user.
- * 
- * @param {string} destStr the query.
- * @returns {[boolean, string|string]} a pair (isValid, error-or-result).
- */
-function validateDestination(destStr) {
-  const destTrimmed = destStr.trim();
-  if (destTrimmed === '') {
-    const errMsg = 'Destination cannot be emtpy. Please, enter a destination.';
-    return [false, errMsg];
-  } else {
-    const result = destTrimmed;
-    return [true, result];
-  }
-}
-
-/**
- * Validate the date provided by the user.
- * 
- * @param {string} dateStr the date (in ISO format).
- * @param {luxon.DateTime} now the current date.
- * @returns {[boolean, string|luxon.DateTime]} a pair (isValid, error-or-result).
- */
-function validateDate(dateStr, now) {
-  const dateTrimmed = dateStr.trim();
-  if (dateTrimmed === '') {
-    const errMsg = 'Date cannot be empty. Please, enter a date.';
-    return [false, errMsg];
-  } else {
-    const date = luxon.DateTime.fromISO(dateTrimmed);
-    // See https://github.com/moment/luxon/blob/master/docs/validity.md.
-    if (!date.isValid) {
-      const errMsg = 'Date is invalid. Please, enter a valid date.';
-      return [false, errMsg];
-    } else if (date < now) {
-      const errMsg = 'Date cannot be in the past. Please, enter a valid date.';
-      return [false, errMsg];
-    } else if (date > now.plus({ years: MAX_YEARS_FROM_NOW })) {
-      const errMsg = `Date cannot be more than ${MAX_YEARS_FROM_NOW} year(s) from now. Please, enter a valid date.`;
-      return [false, errMsg];
-    } else {
-      const result = date;
-      return [true, result];
-    }
-  }
-}
-
-/*------------------------------------------------------------------------------------------------
  * Main part
  *------------------------------------------------------------------------------------------------*/
 
@@ -86,7 +32,7 @@ function validateInputs(destStr, dateStr, now) {
   // We validate as many input fields as possible in one pass.
 
   // Validate the destination.
-  const [destIsValid, errOrDest] = validateDestination(destStr);
+  const [destIsValid, errOrDest] = formUtils.validateDestination(destStr);
   if (!destIsValid) {
     /** @type {string} */
     const destErrMsg = errOrDest;
@@ -96,14 +42,14 @@ function validateInputs(destStr, dateStr, now) {
   }
 
   // Validate the date.
-  const [dateIsValid, errOrDate] = validateDate(dateStr, now);
+  const [dateIsValid, errOrDate] = formUtils.validateDate(dateStr, now);
   if (!dateIsValid) {
     /** @type {string} */
     // @ts-ignore: Type 'string | ...' is not assignable to ... .
     const dateErrMsg = errOrDate;
-    formUtils.showErrorDestination(dateErrMsg);
+    formUtils.showErrorDate(dateErrMsg);
   } else {
-    formUtils.clearErrorDestination();
+    formUtils.clearErrorDate();
   }
 
   const isValid = destIsValid && dateIsValid;

@@ -17,8 +17,8 @@ const BACKEND_API_BASE_URL = 'http://localhost:3000';
 /**
  * API endpoint to search for a destination.
  */
-// const GET_DESTINATION_ENDPOINT = `${ BACKEND_API_BASE_URL }/getDestination`;
-const GET_DESTINATION_ENDPOINT = `${BACKEND_API_BASE_URL}/test/getDestination`;
+const GET_DESTINATION_ENDPOINT = `${BACKEND_API_BASE_URL}/getDestination`;
+// const GET_DESTINATION_ENDPOINT = `${BACKEND_API_BASE_URL}/test/getDestination`;
 
 /**
  * API endpoint to retrieve the weather for a given location, in given number of days.
@@ -29,8 +29,8 @@ const GET_WEATHER_ENDPOINT = `${BACKEND_API_BASE_URL}/test/getWeather`;
 /**
  * API endpoint to retrieve a picture for a given location.
  */
-// const GET_PICTURE_ENDPOINT = `${BACKEND_API_BASE_URL}/getPicture`;
-const GET_PICTURE_ENDPOINT = `${BACKEND_API_BASE_URL}/test/getPicture`;
+const GET_PICTURE_ENDPOINT = `${BACKEND_API_BASE_URL}/getPicture`;
+// const GET_PICTURE_ENDPOINT = `${BACKEND_API_BASE_URL}/test/getPicture`;
 
 /*------------------------------------------------------------------------------------------------
  * Destination

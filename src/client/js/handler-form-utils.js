@@ -1,6 +1,66 @@
 // @ts-check
 'use strict';
 
+// 3rd party.
+import * as luxon from 'luxon';
+
+/*------------------------------------------------------------------------------------------------
+ * Utilities to validate inputs
+ *------------------------------------------------------------------------------------------------*/
+
+/**
+ * The maximum number of years in the future a trip can be.
+ */
+export const MAX_YEARS_FROM_NOW = 20;
+
+/**
+ * Validates the destination provided by the user.
+ * 
+ * @param {string} destStr the query.
+ * @returns {[boolean, string|string]} a pair (isValid, error-or-result).
+ */
+export function validateDestination(destStr) {
+  const destTrimmed = destStr.trim();
+  if (destTrimmed === '') {
+    const errMsg = 'Destination cannot be empty. Please, enter a destination.';
+    return [false, errMsg];
+  } else {
+    const result = destTrimmed;
+    return [true, result];
+  }
+}
+
+/**
+ * Validates the date provided by the user.
+ * 
+ * @param {string} dateStr the date (in ISO format).
+ * @param {luxon.DateTime} now the current date.
+ * @returns {[boolean, string|luxon.DateTime]} a pair (isValid, error-or-result).
+ */
+export function validateDate(dateStr, now) {
+  const dateTrimmed = dateStr.trim();
+  if (dateTrimmed === '') {
+    const errMsg = 'Date cannot be empty. Please, enter a date.';
+    return [false, errMsg];
+  } else {
+    const date = luxon.DateTime.fromISO(dateTrimmed);
+    // See https://github.com/moment/luxon/blob/master/docs/validity.md.
+    if (!date.isValid) {
+      const errMsg = 'Date is invalid. Please, enter a valid date.';
+      return [false, errMsg];
+    } else if (date < now) {
+      const errMsg = 'Date cannot be in the past. Please, enter a valid date.';
+      return [false, errMsg];
+    } else if (date > now.plus({ years: MAX_YEARS_FROM_NOW })) {
+      const errMsg = `Date cannot be more than ${MAX_YEARS_FROM_NOW} year(s) from now. Please, enter a valid date.`;
+      return [false, errMsg];
+    } else {
+      const result = date;
+      return [true, result];
+    }
+  }
+}
+
 /*------------------------------------------------------------------------------------------------
  * Utilities to interact with the UI
  *------------------------------------------------------------------------------------------------*/

@@ -22,9 +22,12 @@ const DEFAULT_TIMEOUT_MS = 5_000; // 5 seconds.
  * Returns the number of remaining days until a given date.
  * @param {luxon.DateTime} date the given date.
  * @param {luxon.DateTime} now the current date.
+ * @return {number} the number of the days as an integer.
  */
 export function getNumRemainingDays(date, now) {
-  return Math.ceil(date.diff(now, 'days').days);
+  const dateSod = date.startOf('day');
+  const nowSod = now.startOf('day');
+  return Math.ceil(dateSod.diff(nowSod, 'days').days);
 }
 
 /**
