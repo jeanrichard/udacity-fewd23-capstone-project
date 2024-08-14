@@ -7,7 +7,7 @@ import { enableFetchMocks } from 'jest-fetch-mock';
 enableFetchMocks();
 
 // Project.
-import { postData } from '../src/client/js/utils.js';
+import { postData } from '../../src/client/js/utils.js';
 
 const MOCK_DATA = {
   value: 42,

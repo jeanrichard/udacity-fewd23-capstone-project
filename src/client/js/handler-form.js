@@ -5,13 +5,14 @@
 import * as luxon from 'luxon';
 
 // Project.
-import { getDestination, getWeather, getPicture } from './utils-api';
+import { getDestination, getWeather, getPicture, saveTrip, deleteTrip } from './utils-api';
 import * as formUtils from './handler-form-utils';
 import * as typedefs from './typedefs';
 import * as utils from './utils';
+import { getTrips, splitTrips, tripEltFromObj } from './utils-trip';
 
 // @ts-ignore: Cannot find module ... .
-import imagePlaceholder from '../images/no-image-available_1024x1024.png';
+import imagePlaceholder from '../assets/images/material-symbols-light--hide-image-outline.png';
 
 /*------------------------------------------------------------------------------------------------
  * Main part
@@ -19,16 +20,17 @@ import imagePlaceholder from '../images/no-image-available_1024x1024.png';
 
 /**
  * Validates the inputs provided by the user and shows errors where needed.
- * 
+ *
  * If one or more inputs are invalid, returns a tuple `[false, null, null]`. Otherwise, returns a
  * tuple `[true, dest, date]`.
- * 
+ *
  * @param {string} destStr the query.
- * @param {string} dateStr the date (in ISO format).
+ * @param {string} dateDepartingStr the date (in ISO format).
+ * @param {string} dateReturningStr the date (in ISO format).
  * @param {luxon.DateTime} now the current date.
- * @return {[boolean, null|string, null|luxon.DateTime]} as described above.
+ * @return {[boolean, null|string, null|luxon.DateTime, null|luxon.DateTime]} as described above.
  */
-function validateInputs(destStr, dateStr, now) {
+function validateInputs(destStr, dateDepartingStr, dateReturningStr, now) {
   // We validate as many input fields as possible in one pass.
 
   // Validate the destination.
@@ -41,40 +43,85 @@ function validateInputs(destStr, dateStr, now) {
     formUtils.clearErrorDestination();
   }
 
-  // Validate the date.
-  const [dateIsValid, errOrDate] = formUtils.validateDate(dateStr, now);
-  if (!dateIsValid) {
+  // Validate the date departing.
+  const maxDate = now.plus({ years: formUtils.MAX_YEARS_FROM_NOW });
+  const [dateDepIsValid, errOrDateDep] = formUtils.validateDate(dateDepartingStr, now, maxDate);
+  console.log('dateDepIsValid', dateDepIsValid, ', errOrDateDep', errOrDateDep);
+  if (!dateDepIsValid) {
     /** @type {string} */
     // @ts-ignore: Type 'string | ...' is not assignable to ... .
-    const dateErrMsg = errOrDate;
-    formUtils.showErrorDate(dateErrMsg);
+    const dateErrMsg = errOrDateDep;
+    formUtils.showErrorDateDeparting(dateErrMsg);
   } else {
-    formUtils.clearErrorDate();
+    formUtils.clearErrorDateDeparting();
   }
+  /** @type {luxon.DateTime} */
+  // @ts-ignore: Type 'string | ...' is not assignable to ... .
+  const dateDep = errOrDateDep;
 
-  const isValid = destIsValid && dateIsValid;
+  // Validate the date returning.
+  const [dateRetIsValid, errOrDateRet] = formUtils.validateDate(dateReturningStr, dateDep, maxDate);
+  if (!dateRetIsValid) {
+    /** @type {string} */
+    // @ts-ignore: Type 'string | ...' is not assignable to ... .
+    const dateErrMsg = errOrDateRet;
+    formUtils.showErrorDateReturning(dateErrMsg);
+  } else {
+    formUtils.clearErrorDateReturning();
+  }
+  /** @type {luxon.DateTime} */
+  // @ts-ignore: Type 'string | ...' is not assignable to ... .
+  const dateRet = errOrDateRet;
+
+  const isValid = destIsValid && dateDepIsValid && dateRetIsValid;
   if (!isValid) {
-    return [isValid, null, null];
+    return [isValid, null, null, null];
   } else {
     /** @type {string} */
     const dest = errOrDest;
-    /** @type {luxon.DateTime} */
-    // @ts-ignore: Type 'string | ...' is not assignable to ... .
-    const date = errOrDate;
-    return [isValid, dest, date];
+
+
+    return [isValid, dest, dateDep, dateRet];
   }
 }
 
 /**
  * Updates the UI.
  *
- * @param {number} numDays 
- * @param {typedefs.DestinationSuccess} dstData 
- * @param {typedefs.WeatherSuccess} wthData 
- * @param {typedefs.PictureSuccess} picData 
+ * @param {Map<string, typedefs.Trip>} trips
+ * @param {luxon.DateTime} now
+ * @param {luxon.DateTime} dateDeparting
+ * @param {luxon.DateTime} dateReturning
+ * @param {typedefs.Destination} dstData
+ * @param {typedefs.Weather} wthData
+ * @param {typedefs.Picture} picData
  */
-function updateUI(numDays, dstData, wthData, picData) {
-  // 1. Retrieve the template and clone it.
+function addTrip(trips, now, dateDeparting, dateReturning, dstData, wthData, picData) {
+  // We buld the trip object.
+  const tripId = self.crypto.randomUUID();
+  const tripObj = {
+    tripId: tripId,
+    destination: dstData,
+    dateDeparting: dateDeparting.toMillis(),
+    dateReturning: dateReturning.toMillis(),
+    weather: wthData,
+    picture: picData,
+    isSaved: false,
+  };
+
+  // We add it to the collection.
+  trips.set(tripId, tripObj);
+
+  displayTrips(trips, now);
+}
+
+/**
+ * 
+ * @param {typedefs.Trip} tripObj
+ * @param {luxon.DateTime} now 
+ */
+function displayTrip(tripObj, now) {
+  // We create a fragment based on the template.
 
   /** @type{ HTMLTemplateElement } */
   // @ts-ignore: Type 'HTMLTemplateElement | null' is not assignable ... .
@@ -83,59 +130,142 @@ function updateUI(numDays, dstData, wthData, picData) {
   // @ts-ignoreType: Type 'Node' is missing the following properties ... .
   const tripFragment = tripTemplate.content.cloneNode(/*deep=*/ true);
 
-  // 2. Update the fields.
+  // We populate the fragment.
+  /** @type {HTMLElement} */
+  // @ts-ignore: Type 'HTMLTemplateElement | null' is not assignable ... .
+  const tripElt = tripFragment.querySelector('.trip');
+  tripEltFromObj(tripElt, tripObj, now);
 
-  // @ts-ignore: Object is possibly 'null'.
-  tripFragment.querySelector('.destination > .name').textContent = dstData.name;
-  // @ts-ignore: Object is possibly 'null'.
-  tripFragment.querySelector('.destination > .country-name').textContent = dstData.countryName;
-  // @ts-ignore: Object is possibly 'null'.
-  tripFragment.querySelector('.destination > .num-days').textContent = numDays;
+  // Add event handlers.
+  tripElt.querySelector('.trip__btn-save')?.addEventListener('click', handleSave);
+  tripElt.querySelector('.trip__btn-delete')?.addEventListener('click', handleDelete);
 
-  // @ts-ignore: Object is possibly 'null'.
-  const weatherElt =
-    numDays <= 1
-      ? tripFragment.querySelector('.weather-current')
-      : tripFragment.querySelector('.weather-forecasts');
+  return tripFragment;
+}
 
-  // Specific fields and hid other type of weather.
-  if (numDays <= 1) {
-    // @ts-ignore: Object is possibly 'null'.
-    tripFragment.querySelector('.weather-forecasts').style.display = 'none';
+/**
+ * 
+ * @param {Array<typedefs.Trip>} trips
+ * @param {HTMLElement} parent
+ * @param {luxon.DateTime} now
+ */
+function updateTripCategory(trips, parent, now) {
+  const frag = new DocumentFragment();
+  if (trips.length > 0) {
+    for (const trip of trips) {
+      frag.append(displayTrip(trip, now));
+    }
   } else {
-    // @ts-ignore: Object is possibly 'null'.
-    weatherElt.querySelector('.temp-max').textContent = wthData.tempMax;
-    // @ts-ignore: Object is possibly 'null'.
-    weatherElt.querySelector('.temp-min').textContent = wthData.tempMin;
-    // @ts-ignore: Object is possibly 'null'.
-    tripFragment.querySelector('.weather-current').style.display = 'none';
+    const p = document.createElement("p");
+    p.innerHTML = '(None)';
+    frag.append(p);
   }
+  parent.replaceChildren(frag);
+}
 
-  // Common fields.
-  // @ts-ignore: Object is possibly 'null'.
-  weatherElt.querySelector('.temp').textContent = wthData.temp;
-  // @ts-ignore: Object is possibly 'null'.
-  weatherElt.querySelector('.weather-desc').textContent = wthData.weather.desc;
-  // @ts-ignore: Object is possibly 'null'.
-  weatherElt.querySelector('.weather-icon').innerHTML =
-    `<img src="${wthData.weather.iconUrl}" alt="${wthData.weather.desc}.">`;
+/**
+ * 
+ * @param {Map<string, typedefs.Trip>} trips
+ * @param {luxon.DateTime} now
+ */
+export function displayTrips(trips, now) {
+  const [ongoing, pending, past] = splitTrips(trips, now);
 
-  // @ts-ignore: Object is possibly 'null'.
-  tripFragment.querySelector('.location-pic').innerHTML =
-    `<img src="${picData.imageUrl}" alt="An image chosen to represent ${dstData.name}, ${dstData.countryName}.">`;
-
-  // FIXME More to do.
-
-  // Insert the fragment.
+  // Ongoing.
   /** @type {HTMLElement} */
   // @ts-ignore: Type 'HTMLElement | null' is not assignable ... .
-  const parent = document.querySelector('#trips');
-  parent.replaceChildren(tripFragment); // FIXME Multiple trips.
+  const parentOngoing = document.querySelector('#trips-ongoing .trip-container');
+  updateTripCategory(ongoing, parentOngoing, now);
 
+  // Ongoing.
+  /** @type {HTMLElement} */
   // @ts-ignore: Type 'HTMLElement | null' is not assignable ... .
-  document
-    .querySelector('.trips-container')
-    .classList.toggle('trips-container--nonempty', /*force=*/ true);
+  const parentPending = document.querySelector('#trips-pending .trip-container');
+  updateTripCategory(pending, parentPending, now);
+
+  // Ongoing.
+  /** @type {HTMLElement} */
+  // @ts-ignore: Type 'HTMLElement | null' is not assignable ... .
+  const parentPast = document.querySelector('#trips-past .trip-container');
+  updateTripCategory(past, parentPast, now);
+}
+
+export async function handleSave(event) {
+  console.log('::: Save button clicked :::');
+  if (!(event.target instanceof HTMLButtonElement)) {
+    return;
+  }
+  const btn = event.target;
+  /** @type { HTMLElement } */
+  // @ts-ignore: Type 'HTMLElement | null' is not assignable ... . 
+  const tripElt = btn.closest('article.trip');
+  /** @type { string } */
+  // @ts-ignore: Type 'string | null' is not assignable ... . 
+  const tripId = tripElt.getAttribute('data-trip-id');
+
+  const tripObj = getTrips().get(tripId);
+  if (tripObj === undefined) {
+    // Should never happen.
+    return;
+  }
+  const [ok, data] = await saveTrip(tripId, tripObj);
+  console.log('handleSave: ok=', ok, ', data=', data);
+  if (!ok) {
+    // Generic error message.
+    const errMsg = `Failed to save trip. Try again later.`;
+    // @ts-ignore: Property 'message' does not exist on type 'DestinationResult'.
+    formUtils.showErrorDestination(data.message);
+    return;
+  } else {
+    formUtils.clearErrorDestination();
+  }
+}
+
+/**
+ * 
+ * @param {Event} event 
+ */
+export async function handleDelete(event) {
+  console.log('::: Delete button clicked :::');
+  if (!(event.target instanceof HTMLButtonElement)) {
+    return;
+  }
+  const btn = event.target;
+  /** @type { HTMLElement } */
+  // @ts-ignore: Type 'HTMLElement | null' is not assignable ... . 
+  const tripElt = btn.closest('article.trip');
+  /** @type { string } */
+  // @ts-ignore: Type 'string | null' is not assignable ... . 
+  const tripId = tripElt.getAttribute('data-trip-id');
+
+  // Retrieve the model.
+  /** @type { typedefs.Trip } */
+  // @ts-ignore: ... is possibly 'undefined'.
+  const tripObj = getTrips().get(tripId);
+  let refreshUi = true;
+  if (!tripObj.isSaved) {
+    // Remove the model.
+    getTrips().delete(tripId);
+  } else {
+    // Pessimistic update.
+    const [ok, data] = await deleteTrip(tripId);
+    console.log('handleDelete: ok=', ok, ', data=', data);
+    if (!ok) {
+      // Generic error message.
+      const errMsg = `Failed to delete trip. Try again later.`;
+      // @ts-ignore: Property 'message' does not exist on type 'DestinationResult'.
+      formUtils.showErrorDestination(data.message);
+      refreshUi = false;
+    } else {
+      // Remove the model.
+      getTrips().delete(tripId);
+      // We clear any error message.
+      formUtils.clearErrorDestination();
+    }
+  }
+  if (refreshUi) {
+    displayTrips(getTrips(), luxon.DateTime.now());
+  }
 }
 
 /**
@@ -167,15 +297,20 @@ export async function handleSubmit(event) {
   // We retrieve the date.
   /** @type {string} */
   // @ts-ignore: Object is possibly 'null'.
-  const dateStr = document.getElementById('date').value;
+  const dateDepartingStr = document.getElementById('date-departing').value;
+
+  // We retrieve the date.
+  /** @type {string} */
+  // @ts-ignore: Object is possibly 'null'.
+  const dateReturningStr = document.getElementById('date-returning').value;
 
   try {
     // Disable submit button until response or error.
     formUtils.disableSubmit();
 
-    // Current date (to ensure consistency through the entire submit).
+    // Current date (to ensure consistency through the entire submit process).
     const now = luxon.DateTime.now();
-    const [isValid, destOpt, dateOpt] = validateInputs(destStr, dateStr, now);
+    const [isValid, destOpt, dateDepOpt, dateRetOpt] = validateInputs(destStr, dateDepartingStr, dateReturningStr, now);
     if (!isValid) {
       // Abort.
       console.log('handleSubmit: inputs failed validation, aborting.');
@@ -187,26 +322,29 @@ export async function handleSubmit(event) {
     const dest = destOpt;
     /** @type {luxon.DateTime} */
     // @ts-ignore: Type '... | null' is not assignable to ... .
-    const date = dateOpt;
+    const dateDep = dateDepOpt;
+    /** @type {luxon.DateTime} */
+    // @ts-ignore: Type '... | null' is not assignable to ... .
+    const dateRet = dateRetOpt;
 
     // Compute the number of days remaining.
-    const numDays = utils.getNumRemainingDays(date, now);
+    const numDays = utils.getNumRemainingDays(dateDep, now);
 
     // Find the destination.
     const [dstOk, dstData] = await getDestination(destStr);
     console.log('handleSubmit: dstOk=', dstOk, ', dstData=', dstData);
     if (!dstOk) {
-      // Generic error message.
-      const errMsg = `Failed to find destination '${dest}'.`;
       // @ts-ignore: Property 'message' does not exist on type 'DestinationResult'.
-      showErrorDestination(dstData.message);
+      formUtils.showErrorDestination(dstData.message);
       return;
     } else {
       formUtils.clearErrorDestination();
     }
     // The `name` and `countryName` fields contain the resolved names.
-    // @ts-ignore: Property ... does not exist on type 'DestinationResult'.
-    const { lon: lonStr, lat: latStr, name, countryName } = dstData;
+    /** @type { typedefs.Destination } */
+    // @ts-ignore: Type 'DestinationResult' is not assignable ... .
+    const destination = dstData;
+    const { lon: lonStr, lat: latStr, name, countryName } = destination;
     const lon = parseFloat(lonStr);
     const lat = parseFloat(latStr);
 
@@ -221,21 +359,29 @@ export async function handleSubmit(event) {
     } else {
       formUtils.clearErrorSubmit();
     }
+    /** @type { typedefs.Weather } */
+    // @ts-ignore: Type 'WeatherResult' is not assignable ... .
+    const weather = wthData;
 
     // Get the destination picture.
     const [picOk, picData] = await getPicture(name, countryName);
     console.log('handleSubmit: picOk=', picOk, ', picData=', picData);
-    let actualPicData = picData;
+    /** @type {typedefs.Picture} */
+    let picture;
     if (!picOk) {
       // This is not fatal; we simply display a placeholder.
-      actualPicData = {
-        imageUrl: imagePlaceholder,
+      picture = {
+        imageUrl: 'https://api.iconify.design/material-symbols-light/hide-image-outline.svg',
       };
+    } else {
+      // @ts-ignore: Type 'PictureResult' is not assignable ... .
+      picture = picData;
     }
 
     // We update the UI.
-    updateUI(numDays, dstData, wthData, actualPicData);
+    addTrip(getTrips(), now, dateDep, dateRet, destination, weather, picture);
   } finally {
+    // FIXME Clear form.
     formUtils.enableSubmit();
   }
 }

@@ -5,7 +5,7 @@
 import * as luxon from 'luxon';
 
 import { describe, expect, it } from '@jest/globals';
-import { getNumRemainingDays } from '../src/client/js/utils';
+import { getNumRemainingDays } from '../../src/client/js/utils';
 
 describe("Testing 'getNumRemainingDays'", () => {
   it('is a function', () => {
@@ -30,5 +30,5 @@ describe("Testing 'getNumRemainingDays'", () => {
     const date = luxon.DateTime.fromISO(dateStr);
     const now = luxon.DateTime.fromISO(nowStr);
     expect(getNumRemainingDays(date, now)).toBe(expected);
-  })
+  });
 });

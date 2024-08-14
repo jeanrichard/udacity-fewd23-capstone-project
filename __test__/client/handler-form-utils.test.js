@@ -6,7 +6,11 @@ import * as luxon from 'luxon';
 import { describe, expect, it } from '@jest/globals';
 
 // Project.
-import { MAX_YEARS_FROM_NOW, validateDate, validateDestination } from '../src/client/js/handler-form-utils';
+import {
+  MAX_YEARS_FROM_NOW,
+  validateDate,
+  validateDestination,
+} from '../../src/client/js/handler-form-utils';
 
 /*------------------------------------------------------------------------------------------------
  * Utilities to validate inputs
@@ -120,4 +124,3 @@ describe("Testing 'validateDate'", () => {
 /*------------------------------------------------------------------------------------------------
  * Utilities to interact with the UI
  *------------------------------------------------------------------------------------------------*/
-

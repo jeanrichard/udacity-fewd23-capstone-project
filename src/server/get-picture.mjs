@@ -19,9 +19,9 @@ const PIXABAY_API_BASE_URL = 'https://pixabay.com/api/';
 
 /**
  * Builds the request URL to find a picture.
- * 
+ *
  * See the {@link https://pixabay.com/service/about/api/ |Pixabay API documentation}.
- * 
+ *
  * @param {string} q the query.
  * @param {string} apiKey the API key to use with the API.
  * @returns {string} as described above.
@@ -34,7 +34,7 @@ function getPictureMakeUrl(q, apiKey) {
     ['lang', 'en'], // English.
     ['image_type', 'photo'],
     ['safesearch', 'true'], // Only images suitable for all ages.
-    ['order', 'popular'],
+    ['order', 'popularx'],
     ['per_page', '5'], // Default is 20.
   ]).toString();
   return reqUrlObj.toString();
@@ -42,7 +42,7 @@ function getPictureMakeUrl(q, apiKey) {
 
 /**
  * Checks response data and returns a suitable result object.
- * 
+ *
  * @param {any} resData data sent by the Pixabay API.
  * @returns {[number, typedefs.PictureResult]} a pair (http-status, error-or-result).
  */
@@ -55,15 +55,17 @@ function checkAndExtractPicture(resData) {
 
   // We extract the result.
   const record = resData.hits[0];
-  return [200, {
-    imageUrl: record.webformatURL,
-  },
+  return [
+    200,
+    {
+      imageUrl: record.webformatURL,
+    },
   ];
 }
 
 /**
  * Uses the Pixabay API to find a picture.
- * 
+ *
  * @param {string} name the destination name.
  * @param {string} countryName the destination country name.
  * @param {string} apiKey the API key to use with the API.

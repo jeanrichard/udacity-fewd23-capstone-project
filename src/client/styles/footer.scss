@@ -1,14 +1,14 @@
-footer {
+.main-footer {
   padding: 1.5em;
-  background: #000;
-  color: #fff;
+  background: var(--color5);
+  grid-area: main-footer;
 
   a {
-    color: #fff;
-    text-decoration: none;
+    color: inherit;
+    text-decoration-thickness: 0.05em;
   }
 
   a:hover {
-    text-decoration: underline;
+    text-decoration-thickness: 0.1em;
   }
 }

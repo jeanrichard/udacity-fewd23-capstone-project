@@ -1,3 +1,7 @@
 {
-  "extends": "stylelint-config-idiomatic-order"
+  "extends": [
+    "stylelint-config-idiomatic-order",
+    "stylelint-config-standard-scss",
+    "stylelint-config-two-dash-bem"
+  ]
 }

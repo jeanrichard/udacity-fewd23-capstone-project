@@ -7,7 +7,7 @@ import { enableFetchMocks } from 'jest-fetch-mock';
 enableFetchMocks();
 
 // Project.
-import { postData } from '../src/client/js/utils.js';
+import { postData } from '../../src/client/js/utils.js';
 
 describe('Testing functionality to POST a request and return a pair (response, JSON) in the face of fetch timeouts', () => {
   beforeEach(() => {

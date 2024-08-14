@@ -3,14 +3,16 @@
 
 // Node.
 import { cwd } from 'node:process';
+import { randomUUID } from 'node:crypto';
 
-// Express and other dependencies.
+// 3rd party - Express and related dependencies.
 import dotenv from 'dotenv';
 import express from 'express';
 import cors from 'cors';
-import { body, matchedData, validationResult } from 'express-validator';
+import { body, checkSchema, matchedData, param, validationResult } from 'express-validator';
 
 // Project.
+import * as typedefs from './typedefs.mjs';
 import * as utils from './utils.mjs';
 import { getDestination, getDestinationTest } from './get-destination.mjs';
 import { getWeather, getWeatherTest } from './get-weather.mjs';
@@ -30,6 +32,9 @@ const envProperties = [
   ['WEATHERBIT_API_KEY', weatherBitApiKey],
   ['PIXABAY_API_KEY', pixabayApiKey],
 ];
+
+/** @type {Map<string, typedefs.Trip>} */
+const mockDataStore = new Map();
 
 /*------------------------------------------------------------------------------------------------
  * Handlers for destination
@@ -136,7 +141,7 @@ function validateGetWeather() {
 
 /**
  * Handles a request to get the weather for a given location.
- * 
+ *
  * Note: We return a '400 - Bad Request' if the request fails validation.
  *
  * @param {express.Request} req the request.
@@ -209,7 +214,7 @@ function validateGetPicture() {
 
 /**
  * Handles a request to find a picture for a location.
- * 
+ *
  * Note: We return a '400 - Bad Request' if the request fails validation.
  *
  * @param {express.Request} req the request.
@@ -236,7 +241,7 @@ async function handleGetPicture(req, res) {
 
 /**
  * (E2E Testing) Behaves exactly like 'handleGetPicture' but returns canned data.
- * 
+ *
  * Note: We return a '400 - Bad Request' if the request fails validation.
  *
  * @param {express.Request} req the request.
@@ -259,6 +264,230 @@ async function handleGetPictureTest(req, res) {
   }
   // Required for POST.
   res.end();
+}
+
+/*------------------------------------------------------------------------------------------------
+ * Handlers for trips
+ *------------------------------------------------------------------------------------------------*/
+
+/**
+ * Handles a request to GET all trips.
+ *
+ * Note: We return a '400 - Bad Request' if the request fails validation.
+ *
+ * @param {express.Request} _req the request.
+ * @param {express.Response} res the response.
+ */
+function handleGetTrips(_req, res) {
+  console.log('handleGetTrips');
+  const resStatus = 200;
+  const trips = Array.from(mockDataStore.values());
+  // Order trips by departing date, in reverse chronological order.
+  const resData = trips.sort((t1, t2) => t1.dateDeparting - t2.dateDeparting);
+  console.log('handleGetTrips: resStatus=', resStatus, ', resData=', resData);
+  res.status(resStatus).send(trips).end();
+}
+
+/**
+ * Builds the validation chain for a request to DELETE a trip given by its `tripId`.
+ * 
+ * @returns {Array<import('express-validator').ValidationChain>} as described above.
+ */
+function validateDeleteTrip() {
+  return [
+    param('tripId').isUUID().withMessage('must be a valid trip ID'),
+  ];
+}
+
+/**
+ * Handles a request to DELETE a trip given by its `tripId`.
+ *
+ * Note: We return a '400 - Bad Request' if the request fails validation.
+ *
+ * @param {express.Request} req the request.
+ * @param {express.Response} res the response.
+ */
+async function handleDeleteTrip(req, res) {
+  console.log('handleDeleteTrip: req.body=', req.body);
+  const result = validationResult(req);
+  if (!result.isEmpty()) {
+    // There are validation errors.
+    res.status(400).send({
+      message: 'Invalid argument(s).',
+      errors: result.array(),
+    });
+  } else {
+    const reqData = matchedData(req);
+    const done = mockDataStore.delete(reqData.tripId);
+    if (!done) {
+      // Not found.
+      const errMsg = 'Not found.';
+      res.status(404).send({ message: errMsg });
+    } else {
+      res.status(200).send({ message: 'Success.' });
+    }
+  }
+  res.end();
+}
+
+const validateObjDestination = {
+  lon: {
+    isFloat: {
+      options: {
+        min: -180.0,
+        max: +180.0,
+        errorMessage: 'must be a floating point number in range [-180, +180]',
+      },
+    },
+  },
+  lat: {
+    isFloat: {
+      options: {
+        min: -90.0,
+        max: +90.0,
+      },
+      errorMessage: 'must contain a floating point number in range [-90,+ 90]',
+    },
+  },
+  name: {
+    trim: true,
+    escape: true,
+    notEmpty: { 
+      errorMessage: 'must not be empty',
+    },
+  },
+  countryName: {
+    trim: true,
+    escape: true,
+    notEmpty: { 
+      errorMessage: 'must not be empty',
+    },
+  },
+};
+
+const validateBareValTemp = {
+  isFloat: {
+    options: {
+      min: -90.0,
+      max: +60.0,
+    },
+    errorMesage: 'must contain a floating point number in range [-90, +60]',
+  },
+};
+
+const validateObjWeather = {
+  isCurrent: {
+    isBoolean: {
+      options: { strict: true },
+    },
+    errorMessage: 'must be a boolean value',
+  },
+  temp: validateBareValTemp,
+  tempMin: {
+    ...validateBareValTemp,
+    optional: true,
+  },
+  tempMax: {
+    ...validateBareValTemp,
+    optional: true,
+  },
+  'desc.desc': {
+    isLength: {
+      options: { min: 1, max: 256, },
+    },
+  },
+  'desc.iconUrl': {
+    isURL: true,
+  }
+};
+
+const validateObjPicture = {
+  imageUrl: {
+    isURL: true,
+  },
+};
+
+/** Could also use a custom validator. */
+const validateBareValDateTimestamp = {
+  isInt: {
+    options: { min: 0, },
+  },
+};
+
+const validateObjTrip = {
+  tripId: {
+    isUUID: true,
+  },
+  destination: {
+    isObject: true,
+    custom: {
+      options: (/** @type { Object }*/ value) => {
+        return checkSchema(validateObjDestination).run({ body: value });
+      },
+    },
+  },
+  dateDeparting: validateBareValDateTimestamp,
+  dateReturning: validateBareValDateTimestamp,
+  weather: {
+    isObject: true,
+    custom: {
+      options: (/** @type { Object }*/ value) => {
+        return checkSchema(validateObjWeather).run({ body: value });
+      },
+    },
+  }, 
+  picture: {
+    isObject: true,
+    custom: {
+      options: (/** @type { Object }*/ value) => {
+        return checkSchema(validateObjPicture).run({ body: value });
+      },
+    },
+  },
+};
+
+
+/**
+ * Builds the validation chain for a request to DELETE a trip given by its `tripId`.
+ * 
+ * @returns {Array<import('express-validator').ValidationChain>} as described above.
+ */
+function validatePostTrip() {
+  return checkSchema(validateObjTrip);
+}
+
+/*
+ * Handles a request to DELETE a trip given by its `tripId`.
+ *
+ * Note: We return a '422 - Unprocessable Content' if the request fails validation.
+ *
+ * @param {express.Request} req the request.
+ * @param {express.Response} res the response.
+ */
+async function handlePostTrip(req, res) {
+ console.log('handlePostTrip: req.body=', req.body);
+ const result = validationResult(req);
+ if (!result.isEmpty()) {
+   // There are validation errors.
+   res.status(422).send({
+     message: 'Invalid argument(s).',
+     errors: result.array(),
+   });
+ } else {
+   const reqData = matchedData(req);
+   /** @type {typedefs.Trip} */
+   // @ts-ignore: Type 'Record<string, any>' is missing the following properties ... .
+   const tripObj = reqData;
+   const done = mockDataStore.set(tripObj.tripId, tripObj);
+   if (!done) {
+     // Not found.
+     const errMsg = 'Not found.';
+     res.status(404).send({ message: errMsg });
+   } else {
+     res.status(200).send({ message: 'Success.' });
+   }
+ }
+ res.end();
 }
 
 /*------------------------------------------------------------------------------------------------
@@ -298,16 +527,19 @@ app.get('/', function (_req, res) {
   res.sendFile('dist/index.html');
 });
 
-app.post('/getDestination', validateGetDestination(), handleGetDestination);
-app.post('/getWeather', validateGetWeather(), handleGetWeather);
-app.post('/getPicture', validateGetPicture(), handleGetPicture);
+app.post('/search/destination', validateGetDestination(), handleGetDestination);
+app.post('/search/weather', validateGetWeather(), handleGetWeather);
+app.post('/search/picture', validateGetPicture(), handleGetPicture);
+app.get('/trips', handleGetTrips);
+app.post('/trips', validatePostTrip(), handlePostTrip);
+app.delete('/trips/:tripId', validateDeleteTrip(), handleDeleteTrip);
 
 // We only add test endpoints in development.
 if (runenv === 'development') {
-  console.log('Adding test endpoints...');
-  app.post('/test/getDestination', validateGetDestination(), handleGetDestinationTest);
-  app.post('/test/getWeather', validateGetWeather(), handleGetWeatherTest);
-  app.post('/test/getPicture', validateGetPicture(), handleGetPictureTest);
+  console.log('Adding test endpoints for search...');
+  app.post('/test/search/destination', validateGetDestination(), handleGetDestinationTest);
+  app.post('/test/search/weather', validateGetWeather(), handleGetWeatherTest);
+  app.post('/test/search/picture', validateGetPicture(), handleGetPictureTest);
 }
 
 /* Server. */

@@ -21,7 +21,7 @@ const GEONAMES_SEARCH_API_BASE_URL = 'https://secure.geonames.org/searchJSON';
 
 /**
  * Builds the request URL to find the destination.
- * 
+ *
  * See the {@link https://www.geonames.org/export/geonames-search.html |GeoNames Search API documentation}.
  *
  * @param {string} q the query.
@@ -50,7 +50,7 @@ function getDestinationMakeUrl(q, username, maxRows = 10) {
 
 /**
  * Checks response data and returns a suitable result object.
- * 
+ *
  * @param {any} resData data sent by the GeoNames Search API.
  * @returns {[number, typedefs.DestinationResult]} a pair (http-status, error-or-result).
  */
@@ -63,12 +63,15 @@ function checkAndExtractDestination(resData) {
 
   // We extract the result.
   const record = resData.geonames[0];
-  return [200, {
-    lon: record.lng,
-    lat: record.lat,
-    name: record.name,
-    countryName: record.countryName
-  }];
+  return [
+    200,
+    {
+      lon: record.lng,
+      lat: record.lat,
+      name: record.name,
+      countryName: record.countryName,
+    },
+  ];
 }
 
 /**

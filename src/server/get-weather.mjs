@@ -32,9 +32,9 @@ const WEATHEBIT_CURRENT_BASE_URL = 'https://api.weatherbit.io/v2.0/current';
 
 /**
  * Builds the request URL to get the current weather for a given location.
- * 
+ *
  * See the {@link https://www.weatherbit.io/api/weather-current |Current Weather API documentation}.
- * 
+ *
  * @param {number} lon the lon coordinate.
  * @param {number} lat the lat coordinate.
  * @param {string} apiKey the API key to use with the API.
@@ -54,7 +54,7 @@ function getWeatherCurrentMakeUrl(lon, lat, apiKey) {
 
 /**
  * Checks response data and returns a suitable result object.
- * 
+ *
  * @param {any} resData data sent by the WeatherBit Current Weather API.
  * @returns {[number, typedefs.WeatherResult]} a pair (http-status, error-or-result).
  */
@@ -71,10 +71,11 @@ function checkAndExtractWeatherCurrent(resData) {
   return [
     200,
     {
+      isCurrent: true,
       temp: record.temp,
       tempMin: null,
       tempMax: null,
-      weather: {
+      desc: {
         desc: record.weather.description,
         iconUrl: getIconUrl(record.weather.icon),
       },
@@ -84,7 +85,7 @@ function checkAndExtractWeatherCurrent(resData) {
 
 /**
  * Returns the current weather for a given location.
- * 
+ *
  * @param {number} lng the lon coordinate.
  * @param {number} lat the lat coordinate.
  * @param {string} apiKey the API key to use with the API.
@@ -104,7 +105,12 @@ async function getWeatherCurrent(lng, lat, apiKey, timeoutMs = utils.DEFAULT_TIM
   try {
     // This may throw.
     const [res, resData] = await utils.getData(reqUrl, timeoutMs);
-    console.log('getWeatherCurrent: res.status =', res.status, ', resData =', /*resData*/ 'omitted');
+    console.log(
+      'getWeatherCurrent: res.status =',
+      res.status,
+      ', resData =',
+      /*resData*/ 'omitted',
+    );
 
     // We check the HTTP status code.
     if (!res.ok || resData === null) {
@@ -136,7 +142,7 @@ const WEATHEBIT_FORECASTS_BASE_URL = 'https://api.weatherbit.io/v2.0/forecast/da
 
 /**
  * Builds the request URL to get the weather forecast for a given location.
- * 
+ *
  * See the {@link https://www.weatherbit.io/api/weather-forecast-16-day |Weather Forecast API documentation}.
  *
  * @param {number} lon the lon coordinate.
@@ -158,7 +164,7 @@ function getWeatherForecastMakeUrl(lon, lat, apiKey) {
 
 /**
  * Checks response data and returns a suitable result object.
- * 
+ *
  * @param {any} resData data sent by the WeatherBit Weather Forecasts API.
  * @returns {[number, typedefs.WeatherResult]} a pair (http-status, error-or-result).
  */
@@ -176,10 +182,11 @@ function checkAndExtractWeatherForecast(resData) {
   return [
     200,
     {
+      isCurrent: false,
       temp: record.temp,
       tempMin: record.min_temp,
       tempMax: record.max_temp,
-      weather: {
+      desc: {
         desc: record.weather.description,
         iconUrl: getIconUrl(record.weather.icon),
       },
@@ -189,9 +196,9 @@ function checkAndExtractWeatherForecast(resData) {
 
 /**
  * Returns the weather forecast for a given location.
- * 
+ *
  * Note: We get only 7 days in the future with the Free plan.
- * 
+ *
  * @param {number} lng the lon coordinate.
  * @param {number} lat the lat coordinate.
  * @param {string} apiKey the API key to use with the API.
@@ -211,7 +218,12 @@ async function getWeatherForecast(lng, lat, apiKey, timeoutMs = utils.DEFAULT_TI
   try {
     // This may throw.
     const [res, resData] = await utils.getData(reqUrl, timeoutMs);
-    console.log('getWeatherForecast: res.status =', res.status, ', resData =', /*resData*/ 'omitted');
+    console.log(
+      'getWeatherForecast: res.status =',
+      res.status,
+      ', resData =',
+      /*resData*/ 'omitted',
+    );
 
     // We check the HTTP status code.
     if (!res.ok || resData === null) {
@@ -238,7 +250,7 @@ async function getWeatherForecast(lng, lat, apiKey, timeoutMs = utils.DEFAULT_TI
 
 /**
  * Returns the current weather if `numDays` is ≤ 1; returns the weather forecast otherwise.
- * 
+ *
  * Note: We get only 7 days in the future with the Free plan.
  *
  * @param {number} lng the lon coordinate.

@@ -15,7 +15,7 @@ export const MAX_YEARS_FROM_NOW = 20;
 
 /**
  * Validates the destination provided by the user.
- * 
+ *
  * @param {string} destStr the query.
  * @returns {[boolean, string|string]} a pair (isValid, error-or-result).
  */
@@ -32,12 +32,13 @@ export function validateDestination(destStr) {
 
 /**
  * Validates the date provided by the user.
- * 
+ *
  * @param {string} dateStr the date (in ISO format).
- * @param {luxon.DateTime} now the current date.
+ * @param {luxon.DateTime?} dateMin the min date (inclusive).
+ * @param {luxon.DateTime?} dateMax the max date (inclusive).
  * @returns {[boolean, string|luxon.DateTime]} a pair (isValid, error-or-result).
  */
-export function validateDate(dateStr, now) {
+export function validateDate(dateStr, dateMin, dateMax) {
   const dateTrimmed = dateStr.trim();
   if (dateTrimmed === '') {
     const errMsg = 'Date cannot be empty. Please, enter a date.';
@@ -48,11 +49,11 @@ export function validateDate(dateStr, now) {
     if (!date.isValid) {
       const errMsg = 'Date is invalid. Please, enter a valid date.';
       return [false, errMsg];
-    } else if (date < now) {
-      const errMsg = 'Date cannot be in the past. Please, enter a valid date.';
+    } else if (dateMin !== null && date < dateMin) {
+      const errMsg = `Date cannot be before ${dateMin.toLocaleString()}. Please, enter a valid date.`;
       return [false, errMsg];
-    } else if (date > now.plus({ years: MAX_YEARS_FROM_NOW })) {
-      const errMsg = `Date cannot be more than ${MAX_YEARS_FROM_NOW} year(s) from now. Please, enter a valid date.`;
+    } else if (dateMax !== null && date > dateMax) {
+      const errMsg = `Date cannot be after ${dateMax.toLocaleString()}. Please, enter a valid date.`;
       return [false, errMsg];
     } else {
       const result = date;
@@ -68,7 +69,7 @@ export function validateDate(dateStr, now) {
 /**
  * Returns the submit button.
  * Convenience function to get the right type hint.
- * 
+ *
  * @returns {HTMLInputElement} as described above.
  */
 function getSubmitButton() {
@@ -93,13 +94,13 @@ export function enableSubmit() {
 
 /**
  * Updates an element to show an error message.
- * 
+ *
  * @param {HTMLElement} errorElt the element.
  * @param {string} message the message.
  */
 function helpShowError(errorElt, message) {
   errorElt.textContent = message;
-  errorElt.classList.toggle('error-msg--active', /*force=*/ true);
+  errorElt.classList.toggle('text-msg--error', /*force=*/ true);
 }
 
 /**
@@ -108,7 +109,7 @@ function helpShowError(errorElt, message) {
  */
 function helpClearError(errorElt) {
   errorElt.textContent = '';
-  errorElt.classList.toggle('error-msg--active', /*force=*/ false);
+  errorElt.classList.toggle('text-msg--error', /*force=*/ false);
 }
 
 /**
@@ -132,17 +133,34 @@ export function clearErrorDestination() {
  * Shows an error message related to the date field.
  * @param {string} message the message.
  */
-export function showErrorDate(message) {
+export function showErrorDateDeparting(message) {
   // @ts-ignore: Object is possibly 'null'.
-  helpShowError(document.getElementById('date-error'), message);
+  helpShowError(document.getElementById('date-departing-error'), message);
 }
 
 /**
  * Clears an error message related to the date field.
  */
-export function clearErrorDate() {
+export function clearErrorDateDeparting() {
   // @ts-ignore: Object is possibly 'null'.
-  helpClearError(document.getElementById('date-error'));
+  helpClearError(document.getElementById('date-departing-error'));
+}
+
+/**
+ * Shows an error message related to the date field.
+ * @param {string} message the message.
+ */
+export function showErrorDateReturning(message) {
+  // @ts-ignore: Object is possibly 'null'.
+  helpShowError(document.getElementById('date-returning-error'), message);
+}
+
+/**
+ * Clears an error message related to the date field.
+ */
+export function clearErrorDateReturning() {
+  // @ts-ignore: Object is possibly 'null'.
+  helpClearError(document.getElementById('date-returning-error'));
 }
 
 /**

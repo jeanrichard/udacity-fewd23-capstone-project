@@ -1,38 +1,76 @@
-<!doctype html>
+<!DOCTYPE html>
 <html dir="ltr" lang="en">
   <head>
     <meta charset="utf-8" />
     <title>Travel Planner App</title>
+    <meta content="A simple travel planner app" name="description" />
+
+    <!-- Google fonts -->
+    <link href="https://fonts.googleapis.com" rel="preconnect" />
+    <link crossorigin href="https://fonts.gstatic.com" rel="preconnect" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Open+Sans:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500;1,600;1,700&display=swap"
+      rel="stylesheet"
+    />
+
+    <script src="//code.iconify.design/1/1.0.6/iconify.min.js"></script>
+
+    <!-- Our project just needs Font Awesome Solid + Brands. -->
+    <!-- <link href="../assets/fontawesome/css/fontawesome.min.css" rel="stylesheet" />
+    <link href="../assets/fontawesome/css/brands.min.css" rel="stylesheet" />
+    <link href="../assets/fontawesome/css/solid.min.css" rel="stylesheet" /> -->
+
+    <!-- Favicon -->
+    <!-- <link href="./assets/icons/favicon.ico" rel="icon" type="image/x-icon" />
+    <link href="./assets/icons/apple-touch-icon.png" rel="apple-touch-icon" sizes="180x180" />
+    <link href="./assets/icons/favicon-32x32.png" rel="icon" sizes="32x32" type="image/png" />
+    <link href="./assets/icons/favicon-16x16.png" rel="icon" sizes="16x16" type="image/png" />
+    <link href="./site.webmanifest" rel="manifest" /> -->
   </head>
 
   <body>
-    <header>
+    <header class="main-header">
       <div class="logo">
         <img
-          alt="The logo of the Travel Planner application. It shows an earth globe with a trip."
-          src="../icons/logo.png"
+          alt="The logo of the Travel Planner application. It shows an earth globe with a trip, stylized as a dashed line between 2 markers."
+          src="../assets/icons/logo.png"
         />
       </div>
       <h1>Travel Planner</h1>
       <div class="about"><a href="#" onclick="clientlib.handleAbout(event)">About</a></div>
     </header>
 
-    <main>
+    <main class="main-cont">
+      <!-- Next trip form. -->
       <section>
+        <h2>My next trip</h2>
         <form class="" id="input-form" onsubmit="return clientlib.handleSubmit(event)">
-          <label for="destination"> Destination</label>
-          <input
-            id="destination"
-            name="destination"
-            placeholder="Enter your destination"
-            required
-            type="text"
-            value=""
-          />
-          <div class="error-msg" id="destination-error"></div>
-          <label for="date">Date</label>
-          <input id="date" name="date" required type="date" />
-          <div class="error-msg" id="date-error"></div>
+
+          <div id="destination-block"></div>
+            <label for="destination"> Destination</label>
+            <input
+              id="destination"
+              name="destination"
+              placeholder="Enter your destination&hellip;"
+              required
+              type="text"
+              value=""
+            />
+            <div class="text-msg" id="destination-error"></div>
+          </div>
+
+          <div id="date-departing-block">
+            <label for="date-departing">Departing</label>
+            <input id="date-departing" name="date-departing" required type="date" />
+            <div class="text-msg" id="date-departing-error"></div>
+          </div>
+
+          <div id="date-returning-block">
+            <label for="date-returning">Returning</label>
+            <input id="date-returning" name="date-returning" required type="date" />
+            <div class="text-msg" id="date-returning-error"></div>
+          </div>
+
           <input
             id="submit-btn"
             name="submit-btn"
@@ -40,40 +78,84 @@
             type="submit"
             value="Submit"
           />
-          <div class="error-msg" id="submit-error"></div>
+          <div class="text-msg" id="submit-error"></div>
         </form>
       </section>
-      <section>
-        <div class="trips-container">
-          <h2>Trips</h2>
-          <div id="trips"></div>
-        </div>
 
-        <!-- Trip template. -->
-        <template id="trip-template">
-          <div class="trip-details">
-            <p class="destination">
-              My trip to <span class="name"></span>, <span class="country-name"></span>, is
-              <span class="num-days"></span> day(s) away.
-            </p>
-            <p class="weather-current">
-              Current weather is: <span class="temp"></span>&deg;C.
-              <span class="weather-desc"></span>.
-              <span class="weather-icon">placeholder</span>
-            </p>
-            <p class="weather-forecasts">
-              Typical weather for then is: <span class="temp"></span>&deg;C (max:
-              <span class="temp-max"></span>&deg;C, min: <span class="temp-min"></span>&deg;C).
-              <span class="weather-desc"></span>.
-              <span class="weather-icon">placeholder</span>
-            </p>
-            <div class="location-pic"></div>
+      <!-- Trip template. -->
+      <template id="trip-template">
+        <article class="trip">
+          <div class="trip__image"></div>
+          <header class="trip__header">
+            <h3>
+              My trip to <span class="name"></span>, <span class="country-name"></span>, departing
+              <span class="date-departing"></span>
+            </h3>
+          </header>
+          <div class="trip__content">
+            <div class="trip__details">
+              <p>
+                My trip to <span class="name"></span>, <span class="country-name"></span>, is
+                <span class="num-days"></span> day(s) away.
+              </p>
+              <p>Departing: <span class="date-departing"></span></p>
+              <p>Returning: <span class="date-returning"></span></p>
+            </div>
+            <div class="trip__weather" data-weather-kind="current">
+              <div class="trip__weather-current">
+                <p class="trip__weather-about">Current weather is:</p>
+                <p class="trip__weather-temp"><span class="temp"></span>&deg;C</p>
+                <p class="trip__weather-desc"></p>
+                <div class="trip__weather-icon"></div>
+              </div>
+              <div class="trip__weather-forecast">
+                <p class="trip__weather-about">Typical weather for then is:</p>
+                <p class="trip__weather-temp">
+                  <span class="temp"></span>&deg;C (min: <span class="temp-min"></span>&deg;C, max:
+                  <span class="temp-max"></span>&deg;C)
+                </p>
+                <p class="trip__weather-desc"></p>
+                <div class="trip__weather-icon"></div>
+              </div>
+            </div>
+            <div class="trip__buttons">
+              <button class="trip__btn trip__btn-save" title="Save trip" type="submit">Save</button>
+              <button class="trip__btn trip__btn-delete" title="Delete trip" type="submit">
+                Delete
+              </button>
+            </div>
           </div>
-        </template>
+        </article>
+      </template>
+
+      <section id="trips-ongoing">
+        <h2>
+          <span aria-hidden="true" class="iconify" data-icon="mdi-walk"></span> My ongoing trips
+        </h2>
+        <div class="trip-container">
+        </div>
+      </section>
+
+      <section id="trips-pending">
+        <h2>
+          <span aria-hidden="true" class="iconify" data-icon="mdi-clock-time-four-outline"></span>
+          My pending trips
+        </h2>
+        <div class="trip-container">
+        </div>
+      </section>
+
+      <section id="trips-past">
+        <h2>
+          <span aria-hidden="true" class="iconify" data-icon="mdi-archive-outline"></span> My past
+          trips
+        </h2>
+        <div class="trip-container">
+        </div>
       </section>
     </main>
 
-    <footer>
+    <footer class="main-footer">
       <p>
         Etienne Richard /
         <a href="https://www.flaticon.com/free-icons/trip" title="trip icons"
