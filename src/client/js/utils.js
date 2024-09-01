@@ -31,7 +31,7 @@ export function getNumRemainingDays(date, now) {
 }
 
 /**
- * Behaves similar to `fetch` but enforces a strict timeout and returns a pair 
+ * Behaves similar to `fetch` but enforces a strict timeout and returns a pair
  * (response, deserialized-JSON).
  * @param {string | URL | globalThis.Request} input same as `fetch`.
  * @param {RequestInit} [init] same as `fetch`.
@@ -45,7 +45,7 @@ async function timedFetch(input, init, timeoutMs = DEFAULT_TIMEOUT_MS) {
     controller.abort(`timeout ${timeoutMs} (ms)`);
   }, timeoutMs);
   try {
-    const initWithSignal = {...init, signal: controller.signal};
+    const initWithSignal = { ...init, signal: controller.signal };
     // This may throw.
     const res = await fetch(input, initWithSignal);
     // At this point: we received status and headers.
@@ -54,7 +54,7 @@ async function timedFetch(input, init, timeoutMs = DEFAULT_TIMEOUT_MS) {
       // This may throw.
       resData = await res.json();
       // At this point: we received and deserialized the body as JSON.
-    } catch { }
+    } catch {}
     return [res, resData];
   } finally {
     clearTimeout(timeoutId);

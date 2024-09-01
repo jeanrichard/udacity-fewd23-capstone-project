@@ -15,14 +15,24 @@ export const __dirname = path.dirname(__filename);
  *------------------------------------------------------------------------------------------------*/
 
 /**
- * Defautl timeout (ms) for `fetch` calls.
+ * Default timeout (in milliseconds) for `fetch` calls.
  * @type {number}
  */
-const DEFAULT_TIMEOUT_MS = 5_000; // 5 seconds.
+export const DEFAULT_TIMEOUT_MS = 5_000; // 5 seconds.
+
+/**
+ * The HTTP response status code if a request failed validation.
+ * @type {number}
+ */
+export const STATUS_CODE_FAILED_VALIDATION = 422; // Unprocessable Content.
 
 /*------------------------------------------------------------------------------------------------
- * Utilities
+ * Utilities for canned data
  *------------------------------------------------------------------------------------------------*/
+
+export function getRootDir() {
+  return path.resolve(__dirname, '..');
+}
 
 /**
  * A helper function to write an object to a JSON file.
@@ -30,7 +40,7 @@ const DEFAULT_TIMEOUT_MS = 5_000; // 5 seconds.
  * @param {any} obj the object.
  * @param {string} filename the path to the JSON file.
  */
-function objectToFile(obj, filename) {
+export function objectToFile(obj, filename) {
   // Could be made async for efficiency, but this is only used for testing.
   writeFileSync(filename, JSON.stringify(obj, null, 2), { encoding: 'utf-8' });
 }
@@ -41,30 +51,34 @@ function objectToFile(obj, filename) {
  * @param {string} filename the path to the JSON file.
  * @returns {any} the object.
  */
-function objectFromFile(filename) {
+export function objectFromFile(filename) {
   // Could be made async for efficiency, but this is only used for testing.
   return JSON.parse(readFileSync(filename, { encoding: 'utf-8' }));
 }
 
+/*------------------------------------------------------------------------------------------------
+ * Utilities for `fetch`
+ *------------------------------------------------------------------------------------------------*/
+
 /**
- * Sends a GET request, and returns a pair (response, deserialized-JSON).
+ * Behaves similar to `fetch` but enforces a strict timeout and returns a pair
+ * (response, deserialized-JSON).
  *
- * May throw the same exceptions as 'fetch'.
- *
- * @param {string} url the URL to use.
- * @param {number} timeoutMs the timeout, in ms (optional).
+ * @param {string | URL | globalThis.Request} input same as `fetch`.
+ * @param {RequestInit} [init] same as `fetch`.
+ * @param {number} timeoutMs the timeout (in milliseconds).
  * @returns {Promise<[Response, any]>} as described above.
  */
-export async function getData(url, timeoutMs = DEFAULT_TIMEOUT_MS) {
+async function timedFetch(input, init, timeoutMs = DEFAULT_TIMEOUT_MS) {
   // We want strict timeouts on all API calls.
   const controller = new AbortController();
   const timeoutId = setTimeout(() => {
-    console.log('getData: Aborting fetch...');
     controller.abort(`timeout ${timeoutMs} (ms)`);
   }, timeoutMs);
   try {
+    const initWithSignal = { ...init, signal: controller.signal };
     // This may throw.
-    const res = await fetch(url, { signal: controller.signal });
+    const res = await fetch(input, initWithSignal);
     // At this point: we received status and headers.
     let resData = null;
     try {
@@ -78,4 +92,20 @@ export async function getData(url, timeoutMs = DEFAULT_TIMEOUT_MS) {
   }
 }
 
-export { DEFAULT_TIMEOUT_MS, objectToFile, objectFromFile };
+/**
+ * Sends a GET request, and returns a pair (response, deserialized-JSON).
+ *
+ * May throw the same exceptions as 'fetch'.
+ *
+ * @param {string} url the URL to use.
+ * @param {number} timeoutMs the timeout (in milliseconds, optional).
+ * @returns {Promise<[Response, any]>} as described above.
+ */
+export async function timedGet(url, timeoutMs = DEFAULT_TIMEOUT_MS) {
+  /** @type {RequestInit} */
+  const init = {
+    method: 'GET',
+    credentials: 'same-origin',
+  };
+  return timedFetch(url, init, timeoutMs);
+}

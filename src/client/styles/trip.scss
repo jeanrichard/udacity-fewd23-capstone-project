@@ -86,13 +86,13 @@
   }
 
   &__weather {
-    &[data-weather-kind="current"] .trip__weather-forecast,
-    &[data-weather-kind="forecast"] .trip__weather-current {
+    &[data-weather-kind='current'] .trip__weather-forecast,
+    &[data-weather-kind='forecast'] .trip__weather-current {
       display: none;
     }
 
-    &[data-weather-kind="current"] .trip__weather-current,
-    &[data-weather-kind="forecast"] .trip__weather-forecast {
+    &[data-weather-kind='current'] .trip__weather-current,
+    &[data-weather-kind='forecast'] .trip__weather-forecast {
       display: grid;
       margin: 0.75rem 0;
       grid-template:

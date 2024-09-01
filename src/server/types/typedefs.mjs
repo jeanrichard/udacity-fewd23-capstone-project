@@ -14,8 +14,8 @@
 /**
  * Destination.
  * @typedef {Object} Destination
- * @property {string} lon the lon coordinate (decimal number), encoded as a string.
- * @property {string} lat the lat coordinate (decimal number), encoded as a string.
+ * @property {string} lon the lon coordinate (decimal number, encoded as a string).
+ * @property {string} lat the lat coordinate (decimal number, encoded as a string).
  * @property {string} name the resolved destination name.
  * @property {string} countryName the resolved destination country.
  */
@@ -30,19 +30,19 @@
  *------------------------------------------------------------------------------------------------*/
 
 /**
- * Weather.
+ * Weather description.
  * @typedef {Object} WeatherDesc
  * @property {string} desc the description of the weather.
  * @property {string} iconUrl the URL of an icon that represents the weather.
  */
 
 /**
- * Weather success.
+ * Weather.
  * @typedef {Object} Weather
- * @property {boolean} isCurrent `true` for the current weather, `false` for the forecasted weather.
- * @property {string} temp the current/expected temperature.
- * @property {string?} tempMin the min temperature (forecasted weather only).
- * @property {string?} tempMax the max temperature (forecasted weather only).
+ * @property {boolean} isCurrent `true` if current weather, `false` if forecasted weather.
+ * @property {number} temp the current/expected temperature.
+ * @property {number?} tempMin the min temperature (forecasted weather only).
+ * @property {number?} tempMax the max temperature (forecasted weather only).
  * @property {WeatherDesc} desc the weather description.
  */
 
@@ -75,10 +75,10 @@
  * @typedef {Object} Trip
  * @property {string} tripId the trip ID.
  * @property {Destination} destination the destination.
- * @property {number} dateDeparting the departing date.
- * @property {number} dateReturning the returning date.
+ * @property {number} dateDeparting the departing date (in milliseconds since the Unix epoch).
+ * @property {number} dateReturning the returning date (in milliseconds since the Unix epoch).
  * @property {Weather} weather the weather information.
  * @property {Picture} picture the picture selected for the destination.
  */
 
-export { };
+export {};

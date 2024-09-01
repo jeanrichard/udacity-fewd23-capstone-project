@@ -21,7 +21,6 @@ import './styles/form.scss';
 import './styles/footer.scss';
 import './styles/trip.scss';
 
-import './assets/images/material-symbols-light--hide-image-outline.png';
 import { readTrips } from './js/utils-api';
 
 // FIXME Disable Service Worker for the moment.
@@ -40,7 +39,7 @@ import { readTrips } from './js/utils-api';
 //   });
 // }
 
-document.addEventListener('DOMContentLoaded', async _ => {
+document.addEventListener('DOMContentLoaded', async (_) => {
   const [ok, data] = await readTrips();
   console.log('readTrips: ok=', ok, ', data=', data);
   let refreshUi = true;

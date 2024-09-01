@@ -9,14 +9,25 @@ import { randomUUID } from 'node:crypto';
 import dotenv from 'dotenv';
 import express from 'express';
 import cors from 'cors';
-import { body, checkSchema, matchedData, param, validationResult } from 'express-validator';
+import { checkExact, checkSchema, matchedData, validationResult } from 'express-validator';
 
 // Project.
-import * as typedefs from './typedefs.mjs';
-import * as utils from './utils.mjs';
-import { getDestination, getDestinationTest } from './get-destination.mjs';
-import { getWeather, getWeatherTest } from './get-weather.mjs';
-import { getPicture, getPictureTest } from './get-picture.mjs';
+import * as typedefs from './types/typedefs.mjs';
+import * as utils from './utilities/utils.mjs';
+import { getDestination, getDestinationTest } from './routes/search/get-destination.mjs';
+import { getWeather, getWeatherTest } from './routes/search/get-weather.mjs';
+import { getPicture, getPictureTest } from './routes/search/get-picture.mjs';
+
+// Import validation middlewares.
+
+// Search.
+import { validateGetDestination } from './middleware/search/validate-get-destination.mjs';
+import { validateGetWeather } from './middleware/search/validate-get-weather.mjs';
+import { validateGetPicture } from './middleware/search/validate-get-picture.mjs';
+
+// Trips.
+import { validateCreateTrip } from './middleware/trips/validate-create-trip.mjs';
+import { validateDeleteTrip } from './middleware/trips/validate-delete-trip.mjs';
 
 /*------------------------------------------------------------------------------------------------
  * Environment variables
@@ -39,22 +50,6 @@ const mockDataStore = new Map();
 /*------------------------------------------------------------------------------------------------
  * Handlers for destination
  *------------------------------------------------------------------------------------------------*/
-
-/**
- * Builds the validation chain to use for the 'getDestination' end-point.
- * @returns {Array<import('express-validator').ValidationChain>} as described above.
- */
-function validateGetDestination() {
-  return [
-    body('query')
-      .isLength({
-        min: 1,
-        max: 256,
-      })
-      .trim()
-      .withMessage('must be a valid location query'),
-  ];
-}
 
 /**
  * Handles a request to find a destination.
@@ -111,38 +106,7 @@ async function handleGetDestinationTest(req, res) {
  *------------------------------------------------------------------------------------------------*/
 
 /**
- * Builds the validation chain to use for the 'getWeather' end-point.
- * @returns {Array<import('express-validator').ValidationChain>} as described above.
- */
-function validateGetWeather() {
-  return [
-    body('lon')
-      .isFloat({
-        min: -180.0,
-        max: +180.0,
-      })
-      .toFloat()
-      .withMessage('must be a floating point number in range [-180, 180]'),
-    body('lat')
-      .isFloat({
-        min: -90.0,
-        max: +90.0,
-      })
-      .toFloat()
-      .withMessage('must be a floating point number in range [-90, 90]'),
-    body('numDays')
-      .isInt({
-        min: 0,
-      })
-      .toInt()
-      .withMessage('must be a non-negative integer'),
-  ];
-}
-
-/**
  * Handles a request to get the weather for a given location.
- *
- * Note: We return a '400 - Bad Request' if the request fails validation.
  *
  * @param {express.Request} req the request.
  * @param {express.Response} res the response.
@@ -153,7 +117,7 @@ async function handleGetWeather(req, res) {
   const result = validationResult(req);
   if (!result.isEmpty()) {
     // There are validation errors.
-    res.status(400).send({
+    res.status(utils.STATUS_CODE_FAILED_VALIDATION).send({
       message: 'Invalid argument(s).',
       errors: result.array(),
     });
@@ -200,17 +164,6 @@ async function handleGetWeatherTest(req, res) {
 /*------------------------------------------------------------------------------------------------
  * Handlers for picture
  *------------------------------------------------------------------------------------------------*/
-
-/**
- * Builds the validation chain to use for the 'getPicture' end-point.
- * @returns {Array<import('express-validator').ValidationChain>} as described above.
- */
-function validateGetPicture() {
-  return [
-    body('name').isString().notEmpty().withMessage('must be a non-empty string'),
-    body('countryName').isString().withMessage('must be a string'),
-  ];
-}
 
 /**
  * Handles a request to find a picture for a location.
@@ -273,8 +226,6 @@ async function handleGetPictureTest(req, res) {
 /**
  * Handles a request to GET all trips.
  *
- * Note: We return a '400 - Bad Request' if the request fails validation.
- *
  * @param {express.Request} _req the request.
  * @param {express.Response} res the response.
  */
@@ -289,20 +240,7 @@ function handleGetTrips(_req, res) {
 }
 
 /**
- * Builds the validation chain for a request to DELETE a trip given by its `tripId`.
- * 
- * @returns {Array<import('express-validator').ValidationChain>} as described above.
- */
-function validateDeleteTrip() {
-  return [
-    param('tripId').isUUID().withMessage('must be a valid trip ID'),
-  ];
-}
-
-/**
  * Handles a request to DELETE a trip given by its `tripId`.
- *
- * Note: We return a '400 - Bad Request' if the request fails validation.
  *
  * @param {express.Request} req the request.
  * @param {express.Response} res the response.
@@ -330,164 +268,39 @@ async function handleDeleteTrip(req, res) {
   res.end();
 }
 
-const validateObjDestination = {
-  lon: {
-    isFloat: {
-      options: {
-        min: -180.0,
-        max: +180.0,
-        errorMessage: 'must be a floating point number in range [-180, +180]',
-      },
-    },
-  },
-  lat: {
-    isFloat: {
-      options: {
-        min: -90.0,
-        max: +90.0,
-      },
-      errorMessage: 'must contain a floating point number in range [-90,+ 90]',
-    },
-  },
-  name: {
-    trim: true,
-    escape: true,
-    notEmpty: { 
-      errorMessage: 'must not be empty',
-    },
-  },
-  countryName: {
-    trim: true,
-    escape: true,
-    notEmpty: { 
-      errorMessage: 'must not be empty',
-    },
-  },
-};
-
-const validateBareValTemp = {
-  isFloat: {
-    options: {
-      min: -90.0,
-      max: +60.0,
-    },
-    errorMesage: 'must contain a floating point number in range [-90, +60]',
-  },
-};
-
-const validateObjWeather = {
-  isCurrent: {
-    isBoolean: {
-      options: { strict: true },
-    },
-    errorMessage: 'must be a boolean value',
-  },
-  temp: validateBareValTemp,
-  tempMin: {
-    ...validateBareValTemp,
-    optional: true,
-  },
-  tempMax: {
-    ...validateBareValTemp,
-    optional: true,
-  },
-  'desc.desc': {
-    isLength: {
-      options: { min: 1, max: 256, },
-    },
-  },
-  'desc.iconUrl': {
-    isURL: true,
-  }
-};
-
-const validateObjPicture = {
-  imageUrl: {
-    isURL: true,
-  },
-};
-
-/** Could also use a custom validator. */
-const validateBareValDateTimestamp = {
-  isInt: {
-    options: { min: 0, },
-  },
-};
-
-const validateObjTrip = {
-  tripId: {
-    isUUID: true,
-  },
-  destination: {
-    isObject: true,
-    custom: {
-      options: (/** @type { Object }*/ value) => {
-        return checkSchema(validateObjDestination).run({ body: value });
-      },
-    },
-  },
-  dateDeparting: validateBareValDateTimestamp,
-  dateReturning: validateBareValDateTimestamp,
-  weather: {
-    isObject: true,
-    custom: {
-      options: (/** @type { Object }*/ value) => {
-        return checkSchema(validateObjWeather).run({ body: value });
-      },
-    },
-  }, 
-  picture: {
-    isObject: true,
-    custom: {
-      options: (/** @type { Object }*/ value) => {
-        return checkSchema(validateObjPicture).run({ body: value });
-      },
-    },
-  },
-};
-
-
 /**
- * Builds the validation chain for a request to DELETE a trip given by its `tripId`.
- * 
- * @returns {Array<import('express-validator').ValidationChain>} as described above.
- */
-function validatePostTrip() {
-  return checkSchema(validateObjTrip);
-}
-
-/*
- * Handles a request to DELETE a trip given by its `tripId`.
+ * Handles a request to create a trip.
  *
- * Note: We return a '422 - Unprocessable Content' if the request fails validation.
- *
- * @param {express.Request} req the request.
- * @param {express.Response} res the response.
+ * @param {express.Request} req - The request.
+ * @param {express.Response} res - The response.
  */
 async function handlePostTrip(req, res) {
- console.log('handlePostTrip: req.body=', req.body);
- const result = validationResult(req);
- if (!result.isEmpty()) {
-   // There are validation errors.
-   res.status(422).send({
-     message: 'Invalid argument(s).',
-     errors: result.array(),
-   });
- } else {
-   const reqData = matchedData(req);
-   /** @type {typedefs.Trip} */
-   // @ts-ignore: Type 'Record<string, any>' is missing the following properties ... .
-   const tripObj = reqData;
-   const done = mockDataStore.set(tripObj.tripId, tripObj);
-   if (!done) {
-     // Not found.
-     const errMsg = 'Not found.';
-     res.status(404).send({ message: errMsg });
-   } else {
-     res.status(200).send({ message: 'Success.' });
-   }
- }
- res.end();
+  console.log('handlePostTrip: req.body=', req.body);
+  const result = validationResult(req);
+  if (!result.isEmpty()) {
+    // There are validation errors.
+    res.status(utils.STATUS_CODE_FAILED_VALIDATION).send({
+      message: 'Invalid argument(s).',
+      errors: result.array(),
+    });
+  } else {
+    const reqData = matchedData(req);
+    /** @type {typedefs.Trip} */
+    // @ts-ignore: Type 'Record<string, any>' is missing the following properties ... .
+    const tripObj = reqData;
+    // We generate the trip ID.
+    const tripId = randomUUID();
+    tripObj.tripId = tripId;
+    const done = mockDataStore.set(tripId, tripObj);
+    if (!done) {
+      // Not found.
+      const errMsg = 'Not found.';
+      res.status(404).send({ message: errMsg });
+    } else {
+      res.status(200).send({ tripId: tripId, message: 'Success.' });
+    }
+  }
+  res.end();
 }
 
 /*------------------------------------------------------------------------------------------------
@@ -527,19 +340,23 @@ app.get('/', function (_req, res) {
   res.sendFile('dist/index.html');
 });
 
-app.post('/search/destination', validateGetDestination(), handleGetDestination);
-app.post('/search/weather', validateGetWeather(), handleGetWeather);
-app.post('/search/picture', validateGetPicture(), handleGetPicture);
+app.post('/search/destination', checkExact(validateGetDestination()), handleGetDestination);
+app.post('/search/weather', checkExact(validateGetWeather()), handleGetWeather);
+app.post('/search/picture', checkExact(validateGetPicture()), handleGetPicture);
 app.get('/trips', handleGetTrips);
-app.post('/trips', validatePostTrip(), handlePostTrip);
-app.delete('/trips/:tripId', validateDeleteTrip(), handleDeleteTrip);
+app.post('/trips', checkExact(validateCreateTrip()), handlePostTrip);
+app.delete('/trips/:tripId', checkExact(validateDeleteTrip()), handleDeleteTrip);
 
 // We only add test endpoints in development.
 if (runenv === 'development') {
   console.log('Adding test endpoints for search...');
-  app.post('/test/search/destination', validateGetDestination(), handleGetDestinationTest);
-  app.post('/test/search/weather', validateGetWeather(), handleGetWeatherTest);
-  app.post('/test/search/picture', validateGetPicture(), handleGetPictureTest);
+  app.post(
+    '/test/search/destination',
+    checkExact(validateGetDestination()),
+    handleGetDestinationTest,
+  );
+  app.post('/test/search/weather', checkExact(validateGetWeather()), handleGetWeatherTest);
+  app.post('/test/search/picture', checkExact(validateGetPicture()), handleGetPictureTest);
 }
 
 /* Server. */
@@ -548,7 +365,7 @@ if (runenv === 'development') {
 const server = app.listen(PORT, () => {
   console.log(`Express app running on localhost: ${PORT}`);
   console.log(`Express app cwd: ${cwd()}`);
-  console.log(`Express app parent directory: ${utils.__dirname}`);
+  console.log(`Express app root directory: ${utils.getRootDir()}`);
 
   // Validate the configuration.
   let closeServer = false;

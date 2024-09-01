@@ -17,8 +17,8 @@ export function getTrips() {
 }
 
 /**
- * 
- * @param {Array<typedefs.Trip>} data 
+ *
+ * @param {Array<typedefs.Trip>} data
  */
 export function loadTrips(data) {
   trips.clear();
@@ -26,6 +26,7 @@ export function loadTrips(data) {
     trip.isSaved = true;
     trips.set(trip.tripId, trip);
   }
+  console.log('HERE:, trip=', trips);
 }
 
 /**
@@ -53,14 +54,15 @@ export function splitTrips(trips, now) {
       ongoing.push(trip);
     } else if (nowMs < trip.dateDeparting) {
       pending.push(trip);
-    } else { // trip.dateReturning < nowMs
+    } else {
+      // trip.dateReturning < nowMs
       past.push(trip);
     }
   }
 
   // 2. Sort each group.
   /** @type {function(typedefs.Trip, typedefs.Trip): number} */
-  const chronoOrder = (t1, t2) => (t1.dateDeparting - t2.dateDeparting);
+  const chronoOrder = (t1, t2) => t1.dateDeparting - t2.dateDeparting;
   /** @type {function(typedefs.Trip, typedefs.Trip): number} */
   const reverseChronoOrder = (t1, t2) => -chronoOrder(t1, t2);
 
@@ -72,10 +74,10 @@ export function splitTrips(trips, now) {
 }
 
 /**
- * 
- * @param {HTMLElement} element 
- * @param {string} selectors 
- * @param {string} text 
+ *
+ * @param {HTMLElement} element
+ * @param {string} selectors
+ * @param {string} text
  */
 function fill(element, selectors, text) {
   const elt = element.querySelector(selectors);
@@ -84,10 +86,10 @@ function fill(element, selectors, text) {
 }
 
 /**
- * 
- * @param {HTMLElement} element 
- * @param {string} selectors 
- * @param {string | null} text 
+ *
+ * @param {HTMLElement} element
+ * @param {string} selectors
+ * @param {string | null} text
  */
 function fillOptional(element, selectors, text) {
   const elt = element.querySelector(selectors);
@@ -102,8 +104,8 @@ export const WEATHER_KIND_FORECAST = 'forecast';
 export const IMAGE_DESC = 'A picture chosen to represent your destination.';
 
 /**
- * 
- * @param {HTMLElement} tripElt 
+ *
+ * @param {HTMLElement} tripElt
  * @param {typedefs.Trip} tripObj
  * @param {luxon.DateTime} now
  */
@@ -129,8 +131,7 @@ export function tripEltFromObj(tripElt, tripObj, now) {
   /** @type {HTMLElement} */
   // @ts-ignore: Type 'HTMLInputElement | null' is not assignable ... .
   const imageElt = tripElt.querySelector('.trip__image');
-  imageElt.innerHTML =
-    `<img alt="${IMAGE_DESC}" src="${pictureObj.imageUrl}">`;
+  imageElt.innerHTML = `<img alt="${IMAGE_DESC}" src="${pictureObj.imageUrl}">`;
 
   // Header.
   /** @type {HTMLElement} */
@@ -155,14 +156,12 @@ export function tripEltFromObj(tripElt, tripObj, now) {
   // @ts-ignore: Type 'HTMLInputElement | null' is not assignable ... .
   const weatherUnionElt = tripElt.querySelector('.trip__weather');
   // Store kind as data attribute.
-  const weatherKind = (weatherObj.isCurrent)
-    ? WEATHER_KIND_CURRENT
-    : WEATHER_KIND_FORECAST;
+  const weatherKind = weatherObj.isCurrent ? WEATHER_KIND_CURRENT : WEATHER_KIND_FORECAST;
   weatherUnionElt.setAttribute('data-weather-kind', weatherKind);
 
   /** @type {HTMLElement} */
   // @ts-ignore: Type 'HTMLInputElement | null' is not assignable ... .
-  const weatherElt = (tripObj.weather.isCurrent)
+  const weatherElt = tripObj.weather.isCurrent
     ? weatherUnionElt.querySelector('.trip__weather-current')
     : weatherUnionElt.querySelector('.trip__weather-forecast');
 
@@ -173,6 +172,5 @@ export function tripEltFromObj(tripElt, tripObj, now) {
   /** @type {HTMLElement} */
   // @ts-ignore: Object is possibly 'null'.
   const weatherIconElt = weatherElt.querySelector('.trip__weather-icon');
-  weatherIconElt.innerHTML =
-    `<img alt="${weatherObj.desc.desc}" src="${weatherObj.desc.iconUrl}">`;
+  weatherIconElt.innerHTML = `<img alt="${weatherObj.desc.desc}" src="${weatherObj.desc.iconUrl}">`;
 }

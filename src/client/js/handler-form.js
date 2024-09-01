@@ -11,9 +11,6 @@ import * as typedefs from './typedefs';
 import * as utils from './utils';
 import { getTrips, splitTrips, tripEltFromObj } from './utils-trip';
 
-// @ts-ignore: Cannot find module ... .
-import imagePlaceholder from '../assets/images/material-symbols-light--hide-image-outline.png';
-
 /*------------------------------------------------------------------------------------------------
  * Main part
  *------------------------------------------------------------------------------------------------*/
@@ -80,7 +77,6 @@ function validateInputs(destStr, dateDepartingStr, dateReturningStr, now) {
     /** @type {string} */
     const dest = errOrDest;
 
-
     return [isValid, dest, dateDep, dateRet];
   }
 }
@@ -98,7 +94,8 @@ function validateInputs(destStr, dateDepartingStr, dateReturningStr, now) {
  */
 function addTrip(trips, now, dateDeparting, dateReturning, dstData, wthData, picData) {
   // We buld the trip object.
-  const tripId = self.crypto.randomUUID();
+  // We generate a temporary trip ID, prefixed with '!'.
+  const tripId = `!${self.crypto.randomUUID()}`;
   const tripObj = {
     tripId: tripId,
     destination: dstData,
@@ -116,9 +113,9 @@ function addTrip(trips, now, dateDeparting, dateReturning, dstData, wthData, pic
 }
 
 /**
- * 
+ *
  * @param {typedefs.Trip} tripObj
- * @param {luxon.DateTime} now 
+ * @param {luxon.DateTime} now
  */
 function displayTrip(tripObj, now) {
   // We create a fragment based on the template.
@@ -144,7 +141,7 @@ function displayTrip(tripObj, now) {
 }
 
 /**
- * 
+ *
  * @param {Array<typedefs.Trip>} trips
  * @param {HTMLElement} parent
  * @param {luxon.DateTime} now
@@ -156,7 +153,7 @@ function updateTripCategory(trips, parent, now) {
       frag.append(displayTrip(trip, now));
     }
   } else {
-    const p = document.createElement("p");
+    const p = document.createElement('p');
     p.innerHTML = '(None)';
     frag.append(p);
   }
@@ -164,7 +161,7 @@ function updateTripCategory(trips, parent, now) {
 }
 
 /**
- * 
+ *
  * @param {Map<string, typedefs.Trip>} trips
  * @param {luxon.DateTime} now
  */
@@ -197,10 +194,10 @@ export async function handleSave(event) {
   }
   const btn = event.target;
   /** @type { HTMLElement } */
-  // @ts-ignore: Type 'HTMLElement | null' is not assignable ... . 
+  // @ts-ignore: Type 'HTMLElement | null' is not assignable ... .
   const tripElt = btn.closest('article.trip');
   /** @type { string } */
-  // @ts-ignore: Type 'string | null' is not assignable ... . 
+  // @ts-ignore: Type 'string | null' is not assignable ... .
   const tripId = tripElt.getAttribute('data-trip-id');
 
   const tripObj = getTrips().get(tripId);
@@ -218,12 +215,14 @@ export async function handleSave(event) {
     return;
   } else {
     formUtils.clearErrorDestination();
+    // We replace the temporary trip ID by the final one.
+    tripObj.tripId = data.tripId;
   }
 }
 
 /**
- * 
- * @param {Event} event 
+ *
+ * @param {Event} event
  */
 export async function handleDelete(event) {
   console.log('::: Delete button clicked :::');
@@ -232,10 +231,10 @@ export async function handleDelete(event) {
   }
   const btn = event.target;
   /** @type { HTMLElement } */
-  // @ts-ignore: Type 'HTMLElement | null' is not assignable ... . 
+  // @ts-ignore: Type 'HTMLElement | null' is not assignable ... .
   const tripElt = btn.closest('article.trip');
   /** @type { string } */
-  // @ts-ignore: Type 'string | null' is not assignable ... . 
+  // @ts-ignore: Type 'string | null' is not assignable ... .
   const tripId = tripElt.getAttribute('data-trip-id');
 
   // Retrieve the model.
@@ -310,7 +309,12 @@ export async function handleSubmit(event) {
 
     // Current date (to ensure consistency through the entire submit process).
     const now = luxon.DateTime.now();
-    const [isValid, destOpt, dateDepOpt, dateRetOpt] = validateInputs(destStr, dateDepartingStr, dateReturningStr, now);
+    const [isValid, destOpt, dateDepOpt, dateRetOpt] = validateInputs(
+      destStr,
+      dateDepartingStr,
+      dateReturningStr,
+      now,
+    );
     if (!isValid) {
       // Abort.
       console.log('handleSubmit: inputs failed validation, aborting.');

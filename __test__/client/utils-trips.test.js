@@ -10,7 +10,12 @@ enableFetchMocks();
 
 import { afterEach, beforeEach, describe, expect, jest, it } from '@jest/globals';
 
-import { WEATHER_KIND_CURRENT, WEATHER_KIND_FORECAST, IMAGE_DESC, tripEltFromObj } from '../../src/client/js/utils-trip.js';
+import {
+  WEATHER_KIND_CURRENT,
+  WEATHER_KIND_FORECAST,
+  IMAGE_DESC,
+  tripEltFromObj,
+} from '../../src/client/js/utils-trip.js';
 
 /**
  * Returns a subset of 'index.html' useful for the test.
@@ -66,8 +71,8 @@ function makeTripSnippet() {
 function makeTripObjCurrent(dateDeparting, dateReturning) {
   return {
     destination: {
-      lon: "7.13476",
-      lat: "47.11682",
+      lon: '7.13476',
+      lat: '47.11682',
       name: 'Lamboing',
       countryName: 'Switzerland',
     },
@@ -75,25 +80,25 @@ function makeTripObjCurrent(dateDeparting, dateReturning) {
     dateReturning: dateReturning.toMillis(),
     weather: {
       isCurrent: true,
-      temp: "17.1",
+      temp: '17.1',
       tempMin: null,
       tempMax: null,
       desc: {
-        desc: "Overcast clouds",
-        iconUrl: "https://cdn.weatherbit.io/static/img/icons/c04d.png",
-      }
+        desc: 'Overcast clouds',
+        iconUrl: 'https://cdn.weatherbit.io/static/img/icons/c04d.png',
+      },
     },
     picture: {
-      imageUrl: "https://cdn.pixabay.com/photo/2023/11/25/15/45/mountains-8411954_150.jpg"
-    }
+      imageUrl: 'https://cdn.pixabay.com/photo/2023/11/25/15/45/mountains-8411954_150.jpg',
+    },
   };
 }
 
 function makeTripObjForecast(dateDeparting, dateReturning) {
   return {
     destination: {
-      lon: "7.13476",
-      lat: "47.11682",
+      lon: '7.13476',
+      lat: '47.11682',
       name: 'Lamboing',
       countryName: 'Switzerland',
     },
@@ -101,22 +106,21 @@ function makeTripObjForecast(dateDeparting, dateReturning) {
     dateReturning: dateReturning.toMillis(),
     weather: {
       isCurrent: false,
-      temp: "16.1",
-      tempMin: "14.5",
-      tempMax: "18.1",
+      temp: '16.1',
+      tempMin: '14.5',
+      tempMax: '18.1',
       desc: {
-        desc: "Broken clouds",
-        iconUrl: "https://cdn.weatherbit.io/static/img/icons/c03d.png",
-      }
+        desc: 'Broken clouds',
+        iconUrl: 'https://cdn.weatherbit.io/static/img/icons/c03d.png',
+      },
     },
     picture: {
-      imageUrl: "https://cdn.pixabay.com/photo/2023/11/25/15/45/mountains-8411954_150.jpg"
-    }
+      imageUrl: 'https://cdn.pixabay.com/photo/2023/11/25/15/45/mountains-8411954_150.jpg',
+    },
   };
 }
 
 describe('Testing functionality to get an HTML trip from an object ', () => {
-
   it('populates an HTML trip fragment (weather: current)', () => {
     // Arrange.
 
@@ -149,21 +153,41 @@ describe('Testing functionality to get an HTML trip from an object ', () => {
     expect(imageElt.src).toBe(tripObj.picture.imageUrl);
 
     // Header.
-    expect(tripElt.querySelector('.trip__header .name')?.textContent).toBe(tripObj.destination.name);
-    expect(tripElt.querySelector('.trip__header .country-name')?.textContent).toBe(tripObj.destination.countryName);
-    expect(tripElt.querySelector('.trip__header .date-departing')?.textContent).toBe(dateDeparting.toLocaleString());
+    expect(tripElt.querySelector('.trip__header .name')?.textContent).toBe(
+      tripObj.destination.name,
+    );
+    expect(tripElt.querySelector('.trip__header .country-name')?.textContent).toBe(
+      tripObj.destination.countryName,
+    );
+    expect(tripElt.querySelector('.trip__header .date-departing')?.textContent).toBe(
+      dateDeparting.toLocaleString(),
+    );
 
     // Details.
-    expect(tripElt.querySelector('.trip__details .name')?.textContent).toBe(tripObj.destination.name);
-    expect(tripElt.querySelector('.trip__details .country-name')?.textContent).toBe(tripObj.destination.countryName);
+    expect(tripElt.querySelector('.trip__details .name')?.textContent).toBe(
+      tripObj.destination.name,
+    );
+    expect(tripElt.querySelector('.trip__details .country-name')?.textContent).toBe(
+      tripObj.destination.countryName,
+    );
     expect(tripElt.querySelector('.trip__details .num-days')?.textContent).toBe('1');
-    expect(tripElt.querySelector('.trip__details .date-departing')?.textContent).toBe(dateDeparting.toLocaleString());
-    expect(tripElt.querySelector('.trip__details .date-returning')?.textContent).toBe(dateReturning.toLocaleString());
+    expect(tripElt.querySelector('.trip__details .date-departing')?.textContent).toBe(
+      dateDeparting.toLocaleString(),
+    );
+    expect(tripElt.querySelector('.trip__details .date-returning')?.textContent).toBe(
+      dateReturning.toLocaleString(),
+    );
 
     // Weather.
-    expect(tripElt.querySelector('.trip__weather')?.getAttribute('data-weather-kind')).toBe(WEATHER_KIND_CURRENT);
-    expect(tripElt.querySelector('.trip__weather-current .temp')?.textContent).toBe(tripObj.weather.temp);
-    expect(tripElt.querySelector('.trip__weather-current .trip__weather-desc')?.textContent).toBe(tripObj.weather.desc.desc);
+    expect(tripElt.querySelector('.trip__weather')?.getAttribute('data-weather-kind')).toBe(
+      WEATHER_KIND_CURRENT,
+    );
+    expect(tripElt.querySelector('.trip__weather-current .temp')?.textContent).toBe(
+      tripObj.weather.temp,
+    );
+    expect(tripElt.querySelector('.trip__weather-current .trip__weather-desc')?.textContent).toBe(
+      tripObj.weather.desc.desc,
+    );
 
     /** @type {HTMLImageElement} */
     // @ts-ignore Type 'HTMLImageElement | null' is not assignable ... .
@@ -196,11 +220,21 @@ describe('Testing functionality to get an HTML trip from an object ', () => {
     // Assert.
 
     // Weather.
-    expect(tripElt.querySelector('.trip__weather')?.getAttribute('data-weather-kind')).toBe(WEATHER_KIND_FORECAST);
-    expect(tripElt.querySelector('.trip__weather-forecast .temp')?.textContent).toBe(tripObj.weather.temp);
-    expect(tripElt.querySelector('.trip__weather-forecast .temp-min')?.textContent).toBe(tripObj.weather.tempMin);
-    expect(tripElt.querySelector('.trip__weather-forecast .temp-max')?.textContent).toBe(tripObj.weather.tempMax);
-    expect(tripElt.querySelector('.trip__weather-forecast .trip__weather-desc')?.textContent).toBe(tripObj.weather.desc.desc);
+    expect(tripElt.querySelector('.trip__weather')?.getAttribute('data-weather-kind')).toBe(
+      WEATHER_KIND_FORECAST,
+    );
+    expect(tripElt.querySelector('.trip__weather-forecast .temp')?.textContent).toBe(
+      tripObj.weather.temp,
+    );
+    expect(tripElt.querySelector('.trip__weather-forecast .temp-min')?.textContent).toBe(
+      tripObj.weather.tempMin,
+    );
+    expect(tripElt.querySelector('.trip__weather-forecast .temp-max')?.textContent).toBe(
+      tripObj.weather.tempMax,
+    );
+    expect(tripElt.querySelector('.trip__weather-forecast .trip__weather-desc')?.textContent).toBe(
+      tripObj.weather.desc.desc,
+    );
 
     /** @type {HTMLImageElement} */
     // @ts-ignore Type 'HTMLImageElement | null' is not assignable ... .

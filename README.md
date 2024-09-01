@@ -7,10 +7,16 @@ Front End Web Developer (2023-2024).
 
 **COPIED FROM PROJECT 4 - NEEDS TO BE UPDATED**
 
+https://express-validator.github.io/docs/api/validation-chain/
+https://github.com/validatorjs/validator.js#sanitizers
+https://expressjs.com/en/advanced/healthcheck-graceful-shutdown.html
+
 https://www.taniarascia.com/javascript-mvc-todo-app/
 https://frontendmasters.com/blog/vanilla-javascript-todomvc/
 https://github.com/validatorjs/validator.js
 https://express-validator.github.io/docs/api/validation-chain/
+
+https://www.freecodecamp.org/news/how-to-build-explicit-apis-with-openapi/
 
 Content:
 
@@ -47,13 +53,14 @@ curl -d '{"lng": 7.13476, "lat": 47.11682, "numDays": 2}' -H "Content-Type: appl
 ```
 
 THOUGHTS
-- Currently, the client pieces a trip by calling multiple API endpoints.
-  Pros: Simple
-  Cons: Malicious user could create a trip that, although harmless, violates the invariant that the destination exists, etc.
-- Idea 1: Create "draft" resource on the backend. Maximum of drafts per user. Periodically deleted.
-- Idea 2: API endpoint return piece of information + signature. When the client composes multiple pieces of infomration,
-  it also sends the signatures to prove that they are legitimate. Sounds complicated.
 
+- Currently, the client pieces a trip by calling multiple API endpoints. Pros: Simple Cons:
+  Malicious user could create a trip that, although harmless, violates the invariant that the
+  destination exists, etc.
+- Idea 1: Create "draft" resource on the backend. Maximum of drafts per user. Periodically deleted.
+- Idea 2: API endpoint return piece of information + signature. When the client composes multiple
+  pieces of infomration, it also sends the signatures to prove that they are legitimate. Sounds
+  complicated.
 
 <a id="instructions"></a>
 

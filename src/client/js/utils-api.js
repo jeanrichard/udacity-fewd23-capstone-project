@@ -202,8 +202,8 @@ export async function readTrips() {
 }
 
 /**
- * 
- * @param {string} tripId 
+ *
+ * @param {string} tripId
  */
 export async function deleteTrip(tripId) {
   console.log('deleteTrip: tripId =', tripId);
@@ -238,7 +238,7 @@ export async function deleteTrip(tripId) {
 }
 
 /**
- * 
+ *
  * @param {string} tripId
  * @param {typedefs.Trip} tripObj
  */
@@ -252,7 +252,10 @@ export async function saveTrip(tripId, tripObj) {
     const url = `${TRIPS_ENDPOINT}`;
     console.log('saveTrip: url:', url);
 
-    const [res, resData] = await utils.postData(url, tripObj);
+    // We need to drop a few properties.
+    const { tripId, isSaved, ...useTripObj } = tripObj;
+
+    const [res, resData] = await utils.postData(url, useTripObj);
     console.log('saveTrip: res.status=', res.status, ', resData=', resData);
 
     // We check the HTTP status code.
