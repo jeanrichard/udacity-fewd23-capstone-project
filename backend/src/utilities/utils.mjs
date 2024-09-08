@@ -4,11 +4,12 @@
 // Node.
 import { readFileSync, writeFileSync } from 'node:fs';
 import path from 'node:path';
-import { fileURLToPath } from 'node:url';
 
-// `__dirname` is not available in ES6 modules.
-export const __filename = fileURLToPath(import.meta.url);
-export const __dirname = path.dirname(__filename);
+// Project.
+import * as pathUtils from './path-utils.mjs';
+
+export const __filename = pathUtils.__filename;
+export const __dirname = pathUtils.__dirname;
 
 /*------------------------------------------------------------------------------------------------
  * Constants

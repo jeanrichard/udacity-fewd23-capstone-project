@@ -157,7 +157,7 @@ export function getDestinationTest() {
 
   try {
     const cannedFilename = 'canned-data/lamboing-geonames.json';
-    const cannedPath = path.resolve(utils.__dirname, cannedFilename);
+    const cannedPath = path.resolve(__dirname, cannedFilename);
     // We read a canned response.
     const resData = utils.objectFromFile(cannedPath);
     // We check the response and extract the result.

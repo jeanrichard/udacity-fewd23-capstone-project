@@ -5,7 +5,7 @@
 import * as luxon from 'luxon';
 
 import { describe, expect, it } from '@jest/globals';
-import { getNumRemainingDays } from '../../src/client/js/utils';
+import { getNumRemainingDays } from '../src/js/utils';
 
 describe("Testing 'getNumRemainingDays'", () => {
   it('is a function', () => {

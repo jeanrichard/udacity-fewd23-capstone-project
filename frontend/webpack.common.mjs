@@ -7,7 +7,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
 export default {
-  entry: path.resolve(__dirname, 'src/client/index.js'),
+  entry: path.resolve(__dirname, 'src/index.js'),
   module: {
     rules: [
       {
@@ -22,7 +22,7 @@ export default {
   },
   plugins: [
     new HtmlWebpackPlugin({
-      template: path.resolve(__dirname, './src/client/views/index.html'),
+      template: path.resolve(__dirname, './src/views/index.html'),
       filename: './index.html', // Relative to 'dist'.
     }),
   ],

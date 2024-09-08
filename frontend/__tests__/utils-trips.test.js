@@ -15,7 +15,7 @@ import {
   WEATHER_KIND_FORECAST,
   IMAGE_DESC,
   tripEltFromObj,
-} from '../../src/client/js/utils-trip.js';
+} from '../src/js/utils-trip.js';
 
 /**
  * Returns a subset of 'index.html' useful for the test.

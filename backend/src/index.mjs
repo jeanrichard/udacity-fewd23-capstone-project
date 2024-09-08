@@ -383,3 +383,6 @@ const server = app.listen(PORT, () => {
 
 // Uncomment to print all properties of the server to the console.
 // console.log(server);
+
+// Export the app for testing.
+export { app, server };

@@ -34,11 +34,12 @@ export function validateDestination(destStr) {
  * Validates the date provided by the user.
  *
  * @param {string} dateStr the date (in ISO format).
- * @param {luxon.DateTime?} dateMin the min date (inclusive).
- * @param {luxon.DateTime?} dateMax the max date (inclusive).
+ * @param {Object} options - The range options.
+ * @param {luxon.DateTime} [options.dateMin] - The lower bound of the range (inclusive).
+ * @param {luxon.DateTime} [options.dateMax] - The upper bound of the range (inclusive).
  * @returns {[boolean, string|luxon.DateTime]} a pair (isValid, error-or-result).
  */
-export function validateDate(dateStr, dateMin, dateMax) {
+export function validateDate(dateStr, { dateMin, dateMax }) {
   const dateTrimmed = dateStr.trim();
   if (dateTrimmed === '') {
     const errMsg = 'Date cannot be empty. Please, enter a date.';
@@ -49,10 +50,10 @@ export function validateDate(dateStr, dateMin, dateMax) {
     if (!date.isValid) {
       const errMsg = 'Date is invalid. Please, enter a valid date.';
       return [false, errMsg];
-    } else if (dateMin !== null && date < dateMin) {
+    } else if (dateMin !== undefined && date < dateMin) {
       const errMsg = `Date cannot be before ${dateMin.toLocaleString()}. Please, enter a valid date.`;
       return [false, errMsg];
-    } else if (dateMax !== null && date > dateMax) {
+    } else if (dateMax !== undefined && date > dateMax) {
       const errMsg = `Date cannot be after ${dateMax.toLocaleString()}. Please, enter a valid date.`;
       return [false, errMsg];
     } else {

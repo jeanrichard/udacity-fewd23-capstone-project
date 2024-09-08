@@ -1,0 +1,37 @@
+.
+├── jest.config.mjs
+├── package.json
+├── package-lock.json
+├── src
+│   ├── canned-data
+│   │   ├── j3l-montagne-de-douanne.jpg
+│   │   ├── lamboing-geonames.json
+│   │   ├── lamboing-pixabay.json
+│   │   ├── lamboing-weatherbit-current.json
+│   │   └── lamboing-weatherbit-forecasts.json
+│   ├── index.mjs
+│   ├── middleware
+│   │   ├── search
+│   │   │   ├── validate-get-destination.mjs
+│   │   │   ├── validate-get-picture.mjs
+│   │   │   └── validate-get-weather.mjs
+│   │   └── trips
+│   │       ├── validate-create-trip.mjs
+│   │       └── validate-delete-trip.mjs
+│   ├── routes
+│   │   ├── search
+│   │   │   ├── get-destination.mjs
+│   │   │   ├── get-picture.mjs
+│   │   │   └── get-weather.mjs
+│   │   └── trips
+│   │       └── createTrip.mjs
+│   ├── types
+│   │   └── typedefs.mjs
+│   └── utilities
+│       ├── utils.mjs
+│       └── validate-utils.mjs
+├── temp.txt
+└── __tests__
+    └── validate-utils.test.js
+
+12 directories, 23 files

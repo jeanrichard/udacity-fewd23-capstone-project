@@ -10,7 +10,7 @@ import {
   MAX_YEARS_FROM_NOW,
   validateDate,
   validateDestination,
-} from '../../src/client/js/handler-form-utils';
+} from '../src/js/handler-form-utils';
 
 /*------------------------------------------------------------------------------------------------
  * Utilities to validate inputs
@@ -23,9 +23,9 @@ describe("Testing 'validateDestination'", () => {
 
   it('detects when the destination is empty', () => {
     // Arrange.
-    const destStrUt = '';
+    const destStr = '';
     // Act.
-    const [isValid, value] = validateDestination(destStrUt);
+    const [isValid, value] = validateDestination(destStr);
     // Assert.
     expect(isValid).toBe(false);
     expect(value).toEqual(expect.any(String));
@@ -34,9 +34,9 @@ describe("Testing 'validateDestination'", () => {
 
   it('detects when the destination is blank', () => {
     // Arrange.
-    const destStrUt = '  '; // Only whitespaces.
+    const destStr = '  '; // Only whitespaces.
     // Act.
-    const [isValid, value] = validateDestination(destStrUt);
+    const [isValid, value] = validateDestination(destStr);
     // Assert.
     expect(isValid).toBe(false);
     expect(value).toEqual(expect.any(String));
@@ -45,9 +45,9 @@ describe("Testing 'validateDestination'", () => {
 
   it('return the result when valid', () => {
     // Arrange.
-    const destStrUt = '  some-destination  ';
+    const destStr = '  some-destination  ';
     // Act.
-    const [isValid, value] = validateDestination(destStrUt);
+    const [isValid, value] = validateDestination(destStr);
     // Assert.
     expect(isValid).toBe(true);
     expect(value).toEqual(expect.any(String));
@@ -66,7 +66,7 @@ describe("Testing 'validateDate'", () => {
     // Arrange.
     const dateStrUt = '';
     // Act.
-    const [isValid, value] = validateDate(dateStrUt, now);
+    const [isValid, value] = validateDate(dateStrUt, {});
     // Assert.
     expect(isValid).toBe(false);
     expect(value).toEqual(expect.any(String));
@@ -77,7 +77,7 @@ describe("Testing 'validateDate'", () => {
     // Arrange.
     const dateStrUt = '   '; // Only whitespaces.
     // Act.
-    const [isValid, value] = validateDate(dateStrUt, now);
+    const [isValid, value] = validateDate(dateStrUt, {});
     // Assert.
     expect(isValid).toBe(false);
     expect(value).toEqual(expect.any(String));
@@ -90,7 +90,7 @@ describe("Testing 'validateDate'", () => {
     // Arrange.
     const dateStrUt = '  2024-Aug-08  ';
     // Act.
-    const [isValid, value] = validateDate(dateStrUt, now);
+    const [isValid, value] = validateDate(dateStrUt, {});
     // Assert.
     expect(isValid).toBe(false);
     expect(value).toEqual(expect.any(String));
@@ -101,26 +101,21 @@ describe("Testing 'validateDate'", () => {
     // Arrange.
     const dateStrUt = now.minus({ days: 1 }).toISODate() || ''; // For typing.
     // Act.
-    const [isValid, value] = validateDate(dateStrUt, now);
+    const [isValid, value] = validateDate(dateStrUt, { dateMin: now });
     // Assert.
     expect(isValid).toBe(false);
     expect(value).toEqual(expect.any(String));
-    expect(value).toMatch(/^Date cannot be in the past/);
+    expect(value).toMatch(/^Date cannot be before/);
   });
 
   it('detects when the date is too many years in the future', () => {
     // Arrange.
-    const yearsToAdd = MAX_YEARS_FROM_NOW + 1;
-    const dateStrUt = now.plus({ years: yearsToAdd }).toISODate() || ''; // For typing.
+    const dateStrUt = now.plus({ days: 1 }).toISODate() || ''; // For typing.
     // Act.
-    const [isValid, value] = validateDate(dateStrUt, now);
+    const [isValid, value] = validateDate(dateStrUt, { dateMax: now });
     // Assert.
     expect(isValid).toBe(false);
     expect(value).toEqual(expect.any(String));
-    expect(value).toMatch(/^Date cannot be more than/);
+    expect(value).toMatch(/^Date cannot be after/);
   });
 });
-
-/*------------------------------------------------------------------------------------------------
- * Utilities to interact with the UI
- *------------------------------------------------------------------------------------------------*/
