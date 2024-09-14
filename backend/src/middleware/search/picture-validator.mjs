@@ -5,7 +5,7 @@
 import { checkSchema } from 'express-validator';
 
 // Project.
-import { schemaStringNotBlank } from '../../utilities/validate-utils.mjs';
+import { schemaStringNotBlank } from '../common/validator-utils.mjs';
 
 // Validation schema for a request to find a picture for a location.
 const schemaGetPicture = {

@@ -282,7 +282,7 @@ export async function handleSubmit(event) {
   // We do no want to submit the form.
   event.preventDefault();
 
-  // This is the way to report form validation errors despite `preventDefault`.
+  // This would be the way to report form validation errors despite `preventDefault`.
   // /** @type{HTMLFormElement} */
   // // @ts-ignore: Object is possibly 'null'.
   // const formElt = document.getElementById('input-form')

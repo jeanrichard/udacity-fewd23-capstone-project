@@ -18,19 +18,19 @@ const BACKEND_API_BASE_URL = 'http://localhost:3000';
  * API endpoint to search for a destination.
  */
 const SEARCH_DESTINATION_ENDPOINT = `${BACKEND_API_BASE_URL}/search/destination`;
-// const SEARCH_DESTINATION_ENDPOINT = `${BACKEND_API_BASE_URL}/test/search/destination`;
+// const SEARCH_DESTINATION_ENDPOINT = `${BACKEND_API_BASE_URL}/search/test/destination`;
 
 /**
  * API endpoint to retrieve the weather for a given location, in given number of days.
  */
 // const SEARCH_WEATHER_ENDPOINT = `${BACKEND_API_BASE_URL}/search/weather`;
-const SEARCH_WEATHER_ENDPOINT = `${BACKEND_API_BASE_URL}/test/search/weather`;
+const SEARCH_WEATHER_ENDPOINT = `${BACKEND_API_BASE_URL}/search/test/weather`;
 
 /**
  * API endpoint to retrieve a picture for a given location.
  */
 const SEARCH_PICTURE_ENDPOINT = `${BACKEND_API_BASE_URL}/search/picture`;
-// const SEARCH_PICTURE_ENDPOINT = `${BACKEND_API_BASE_URL}/test/search/picture`;
+// const SEARCH_PICTURE_ENDPOINT = `${BACKEND_API_BASE_URL}/search/test/picture`;
 
 /**
  * API endpoint to save a trip.

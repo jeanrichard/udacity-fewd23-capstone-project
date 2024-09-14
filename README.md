@@ -7,6 +7,18 @@ Front End Web Developer (2023-2024).
 
 **COPIED FROM PROJECT 4 - NEEDS TO BE UPDATED**
 
+
+THINGS TO MENTION:
+ * Dealing with images that do not necessarily have the expected aspect ratio.
+   --> Explain solution
+ * How to guarantee in the backend that information collected from multiple APIs in the frontend are valid when submitted?
+   --> Explain ideas:
+   1/ Redo everything. Maybe use caching, especially with metered APIs.
+   2/ Define a query ID that is provided to each API. APIs use it to sign their reply. Backend get signed pieces and validate.
+
+
+  /* See https://github.com/fast-average-color/fast-average-color */
+
 https://express-validator.github.io/docs/api/validation-chain/
 https://github.com/validatorjs/validator.js#sanitizers
 https://expressjs.com/en/advanced/healthcheck-graceful-shutdown.html

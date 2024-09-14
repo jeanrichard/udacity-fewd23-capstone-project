@@ -5,7 +5,7 @@
 import { checkSchema } from 'express-validator';
 
 // Project.
-import { schemaNumberInRange, schemaIntegerInRange } from '../../utilities/validate-utils.mjs';
+import { schemaNumberInRange, schemaIntegerInRange } from '../common/validator-utils.mjs';
 
 // Validation schema for a request to find the weather for a location.
 const schemaGetWeather = {

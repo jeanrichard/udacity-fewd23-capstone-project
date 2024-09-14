@@ -10,7 +10,7 @@ import {
   schemaIntegerInRange,
   schemaNumberInRange,
   schemaStringNotBlank,
-} from '../../utilities/validate-utils.mjs';
+} from '../common/validator-utils.mjs';
 
 // Schema for a (value) temperature.
 const schemaValTemp = schemaNumberInRange({ min: -90.0, max: +60.0 });
@@ -89,7 +89,7 @@ const schemaObjTrip = {
   destination: {
     isObject: true,
     custom: {
-      options: (/** @type { Object }*/ value) => {
+      options: (/** @type { object }*/ value) => {
         return checkSchema(schemaObjDestination).run({ body: value });
       },
     },
@@ -99,7 +99,7 @@ const schemaObjTrip = {
   weather: {
     isObject: true,
     custom: {
-      options: (/** @type { Object }*/ value) => {
+      options: (/** @type { object }*/ value) => {
         return checkSchema(schemaObjWeather).run({ body: value });
       },
     },
@@ -107,7 +107,7 @@ const schemaObjTrip = {
   picture: {
     isObject: true,
     custom: {
-      options: (/** @type { Object }*/ value) => {
+      options: (/** @type { object }*/ value) => {
         return checkSchema(schemaObjPicture).run({ body: value });
       },
     },

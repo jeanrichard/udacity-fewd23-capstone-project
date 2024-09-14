@@ -16,7 +16,7 @@ import './styles/resets.scss';
 import './styles/settings.scss';
 import './styles/base.scss';
 import './styles/header.scss';
-import './styles/cont.scss';
+import './styles/content.scss';
 import './styles/form.scss';
 import './styles/footer.scss';
 import './styles/trip.scss';

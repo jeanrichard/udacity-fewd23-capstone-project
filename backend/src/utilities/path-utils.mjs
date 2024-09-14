@@ -1,9 +1,10 @@
 // @ts-check
 'use strict';
 
-import { fileURLToPath } from 'node:url';
+// 3rd party - Node.
 import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 
-// `__dirname` is not available in ES6 modules.
+// `__dirname` is not available in ES modules.
 export const __filename = fileURLToPath(import.meta.url);
 export const __dirname = path.dirname(__filename);

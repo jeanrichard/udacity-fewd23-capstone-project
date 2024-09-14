@@ -1,0 +1,13 @@
+{
+  "compilerOptions": {
+    "target": "ES2021",
+    "module": "ESNext",
+    "checkJs": true,
+    "allowJs": true,
+    "noEmit": true, // Prevents writing output files.
+    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true
+  },
+  "include": ["./**/*.mjs"],
+  "exclude": ["node_modules"]
+}

@@ -8,7 +8,6 @@
  * @param {Object} options - The range options.
  * @param {number} [options.min] - The lower bound of the range (inclusive).
  * @param {number} [options.max] - The upper bound of the range (inclusive).
- *
  * @returns {boolean} Returns `true` if the test succeeds; otherwise, returns `false`.
  */
 export function _isNumberInRange(value, { min, max }) {
@@ -27,7 +26,6 @@ export function _isNumberInRange(value, { min, max }) {
  * @param {Object} options - The range options.
  * @param {number} [options.min] - The lower bound of the range (inclusive).
  * @param {number} [options.max] - The upper bound of the range (inclusive).
- *
  * @returns {boolean} Returns `true` if the test succeeds; otherwise, returns `false`.
  */
 export function _isIntegerInRange(value, { min, max }) {
@@ -43,7 +41,6 @@ export function _isIntegerInRange(value, { min, max }) {
  * Tests if a value is a boolean.
  *
  * @param {any} value - The value to check.
- *
  * @returns {boolean} Returns `true` if the test succeeds; otherwise, returns `false`.
  */
 export function _isBoolean(value) {
@@ -56,12 +53,11 @@ export function _isBoolean(value) {
  * @param {Object} options - The range options.
  * @param {number} [options.min] - The lower bound of the range (inclusive).
  * @param {number} [options.max] - The upper bound of the range (inclusive).
- *
  * @returns {object} As described above.
  */
 export function schemaNumberInRange({ min, max }) {
-  const minStr = (min === undefined) ? '' : `${min}`;
-  const maxStr = (max === undefined) ? '' : `${max}`;
+  const minStr = min === undefined ? '' : `${min}`;
+  const maxStr = max === undefined ? '' : `${max}`;
   return {
     custom: {
       options: (/** @type {any} */ value) => _isNumberInRange(value, { min, max }),
@@ -76,12 +72,11 @@ export function schemaNumberInRange({ min, max }) {
  * @param {Object} options - The range options.
  * @param {number} [options.min] - The lower bound of the range (inclusive).
  * @param {number} [options.max] - The upper bound of the range (inclusive).
- *
  * @returns {object} as described above.
  */
 export function schemaIntegerInRange({ min, max }) {
-  const minStr = (min === undefined) ? '' : `${min}`;
-  const maxStr = (max === undefined) ? '' : `${max}`;
+  const minStr = min === undefined ? '' : `${min}`;
+  const maxStr = max === undefined ? '' : `${max}`;
   return {
     custom: {
       options: (/** @type {any} */ value) => _isIntegerInRange(value, { min, max }),
@@ -92,7 +87,6 @@ export function schemaIntegerInRange({ min, max }) {
 
 /**
  * Returns a validation schema to ensure that a value is a boolean.
- *
  * @returns {object} as described above.
  */
 export function schemaBoolean() {
@@ -107,11 +101,10 @@ export function schemaBoolean() {
 /**
  * Returns a validation schema to ensure that a value is a string, that its length does not exceed
  * `max` characters, and that it does not consist only of white-space characters.
- * 
+ *
  * @param {Object} options - The range options.
  * @param {number} [options.min] - The lower bound of the range (inclusive).
  * @param {number} [options.max] - The upper bound of the range (inclusive).
- *
  * @returns {object} as described above.
  *
  */

@@ -1,15 +1,12 @@
 // @ts-check
 'use strict';
 
-// Node.
-import { readFileSync, writeFileSync } from 'node:fs';
+// 3rd party - Node.
 import path from 'node:path';
+import { readFileSync, writeFileSync } from 'node:fs';
 
 // Project.
 import * as pathUtils from './path-utils.mjs';
-
-export const __filename = pathUtils.__filename;
-export const __dirname = pathUtils.__dirname;
 
 /*------------------------------------------------------------------------------------------------
  * Constants
@@ -28,12 +25,21 @@ export const DEFAULT_TIMEOUT_MS = 5_000; // 5 seconds.
 export const STATUS_CODE_FAILED_VALIDATION = 422; // Unprocessable Content.
 
 /*------------------------------------------------------------------------------------------------
- * Utilities for canned data
+ * General utilities
  *------------------------------------------------------------------------------------------------*/
 
+/**
+ * Returns the path to the root of the backend sub-project.
+ *
+ * @returns {string} As described above.
+ */
 export function getRootDir() {
-  return path.resolve(__dirname, '..');
+  return path.resolve(pathUtils.__dirname, '../..');
 }
+
+/*------------------------------------------------------------------------------------------------
+ * Utilities for canned data
+ *------------------------------------------------------------------------------------------------*/
 
 /**
  * A helper function to write an object to a JSON file.
@@ -99,7 +105,7 @@ async function timedFetch(input, init, timeoutMs = DEFAULT_TIMEOUT_MS) {
  * May throw the same exceptions as 'fetch'.
  *
  * @param {string} url the URL to use.
- * @param {number} timeoutMs the timeout (in milliseconds, optional).
+ * @param {number} timeoutMs the timeout (in milliseconds).
  * @returns {Promise<[Response, any]>} as described above.
  */
 export async function timedGet(url, timeoutMs = DEFAULT_TIMEOUT_MS) {

@@ -1,10 +1,11 @@
 // @ts-check
 'use strict';
 
-// Node.
+// 3rd party - Node.
 import path from 'node:path';
 
 // Project.
+import logger, { sensitive } from '../../config/logger.mjs';
 import * as utils from '../../utilities/utils.mjs';
 import * as typedefs from '../../types/typedefs.mjs';
 
@@ -12,15 +13,12 @@ import * as typedefs from '../../types/typedefs.mjs';
  * Constants
  *------------------------------------------------------------------------------------------------*/
 
-// /**
-//  * Base URL of the GeoNames Search API.
-//  */
-// const GEONAMES_SEARCH_API_BASE_URL = 'http://api.geonames.org/searchJSON';
-
 /**
  * Base URL of the GeoNames Search API.
+ *
+ * @see https://forum.geonames.org/gforum/posts/list/35422.page.
  */
-// See https://forum.geonames.org/gforum/posts/list/35422.page.
+// const GEONAMES_SEARCH_API_BASE_URL = 'http://api.geonames.org/searchJSON';
 const GEONAMES_SEARCH_API_BASE_URL = 'https://secure.geonames.org/searchJSON';
 
 /*------------------------------------------------------------------------------------------------
@@ -31,7 +29,6 @@ const GEONAMES_SEARCH_API_BASE_URL = 'https://secure.geonames.org/searchJSON';
  * Checks the data sent back by the GeoNames Search API and returns a suitable result object.
  *
  * @param {any} resData - The data sent back by the API.
- *
  * @returns {[number, typedefs.DestinationResult]} A pair (http-status, error-or-result).
  */
 function checkAndExtractDestination(resData) {
@@ -61,19 +58,17 @@ function checkAndExtractDestination(resData) {
 /**
  * Builds the request URL to find a destination.
  *
- * See the {@link https://www.geonames.org/export/geonames-search.html |GeoNames Search API documentation}.
- *
- * @param {string} q - The query.
- * @param {string} username - The username to use with the API.
+ * @param {string} query - The query.
+ * @param {string} username - The username to use with the GeoNames API.
  * @param {number} maxRows - The maximum number of rows to return.
- *
  * @returns {string} As described above.
+ * @see See the {@link https://www.geonames.org/export/geonames-search.html |GeoNames Search API documentation}.
  */
-function getDestinationMakeUrl(q, username, maxRows = 1) {
+function getDestinationMakeUrl(query, username, maxRows = 1) {
   const reqUrlObj = new URL(GEONAMES_SEARCH_API_BASE_URL);
   reqUrlObj.search = new URLSearchParams([
     ['username', username],
-    ['q', q],
+    ['q', query],
     ['maxRows', maxRows.toString()],
     ['featureClass', 'H'],
     ['featureClass', 'L'],
@@ -94,11 +89,11 @@ function getDestinationMakeUrl(q, username, maxRows = 1) {
  * @param {string} dest - The query.
  * @param {string} username - The username to authenticate with the API.
  * @param {number} timeoutMs - The timeout (in milliseconds).
- *
  * @returns {Promise<[number, typedefs.DestinationResult]>} A pair (http-status, error-or-result).
  */
 export async function getDestination(dest, username, timeoutMs = utils.DEFAULT_TIMEOUT_MS) {
-  console.log('getDestination: dest=', dest, ', username=', /*username*/ 'redacted');
+  const fn = 'getDestination';
+  logger.info('entering', { fn, dest, username: sensitive(username) });
 
   // Generic error message.
   const errMsg = `Failed to find destination for query '${dest}'.`;
@@ -106,19 +101,13 @@ export async function getDestination(dest, username, timeoutMs = utils.DEFAULT_T
   // We build the request URL.
   // (Since we take the 1st result anyway, we set `maxRows` to 1.)
   const reqUrl = getDestinationMakeUrl(dest, username, /*maxRows=*/ 1);
-  // Careful: URL contains credentials.
-  // console.log('getDestination: reqUrl =', reqUrl);
+  logger.info('built request URL', { fn, reqUrl: sensitive(reqUrl) });
 
   // We send the request to the API.
   try {
     // This may throw.
     const [res, resData] = await utils.timedGet(reqUrl, timeoutMs);
-    console.log(
-      'getDestination: GeoNames Search API: res.status=',
-      res.status,
-      ', resData=',
-      /*resData*/ 'omitted',
-    );
+    logger.info('got response from the GeoNames Search API', { fn, 'res.status': res.status });
 
     // We check the HTTP status code.
     if (!res.ok || resData === null) {
@@ -129,7 +118,7 @@ export async function getDestination(dest, username, timeoutMs = utils.DEFAULT_T
     // We check the response and extract the result.
     return checkAndExtractDestination(resData);
   } catch (err) {
-    console.log('getDestination: err:', err);
+    logger.error('got an error', { fn, err });
     if (err.name == 'AbortError') {
       // It might be worth re-trying.
       return [503, { message: errMsg }];
@@ -150,20 +139,21 @@ export async function getDestination(dest, username, timeoutMs = utils.DEFAULT_T
  * @returns {[number, typedefs.DestinationResult]} A pair (http-status, error-or-result).
  */
 export function getDestinationTest() {
-  console.log('getDestinationTest');
+  const fn = 'getDestinationTest';
+  logger.info('entering', { fn });
 
   // Generic error message.
   const errMsg = 'Failed to find canned destination data.';
 
   try {
-    const cannedFilename = 'canned-data/lamboing-geonames.json';
-    const cannedPath = path.resolve(__dirname, cannedFilename);
+    const cannedFilename = 'src/canned-data/lamboing-geonames.json';
+    const cannedPath = path.resolve(utils.getRootDir(), cannedFilename);
     // We read a canned response.
     const resData = utils.objectFromFile(cannedPath);
     // We check the response and extract the result.
     return checkAndExtractDestination(resData);
   } catch (err) {
-    console.log('getDestinationTest: err=', err);
+    logger.error('got an error', { fn, err });
     // We map all other errors to 500.
     return [500, { message: errMsg }];
   }
