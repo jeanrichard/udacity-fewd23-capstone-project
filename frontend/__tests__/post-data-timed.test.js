@@ -7,7 +7,7 @@ import { enableFetchMocks } from 'jest-fetch-mock';
 enableFetchMocks();
 
 // Project.
-import { postData } from '../src/js/utils.js';
+import { timedPostData } from '../src/js/utilities/utils';
 
 describe('Testing functionality to POST a request and return a pair (response, JSON) in the face of fetch timeouts', () => {
   beforeEach(() => {
@@ -31,7 +31,9 @@ describe('Testing functionality to POST a request and return a pair (response, J
   it("throws a DOMException with name 'AbortError' if 'fetch' is aborted", async () => {
     // @ts-ignore: Property 'mockAbortOnce' does not exist on type ... .
     fetch.mockAbortOnce();
-    await expect(postData('https://example.com/')).rejects.toThrow('The operation was aborted.');
+    await expect(timedPostData('https://example.com/')).rejects.toThrow(
+      'The operation was aborted.',
+    );
   });
 
   it("throws a DOMException with name 'AbortError' if the timeout is exceeded", async () => {
@@ -40,8 +42,8 @@ describe('Testing functionality to POST a request and return a pair (response, J
       jest.advanceTimersByTime(/*msTorun=*/ 20);
       return '';
     });
-    await expect(postData('https://example.com/', /*data=*/ {}, /*timeoutMs=*/ 10)).rejects.toThrow(
-      'The operation was aborted.',
-    );
+    await expect(
+      timedPostData('https://example.com/', /*data=*/ {}, /*timeoutMs=*/ 10),
+    ).rejects.toThrow('The operation was aborted.');
   });
 });

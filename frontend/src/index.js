@@ -1,13 +1,15 @@
 // @ts-check
 'use strict';
 
-import { handleAbout } from './js/handler-about';
-import { handleSubmit } from './js/handler-form';
-import { displayTrips } from './js/handler-form';
-import { getTrips, loadTrips } from './js/utils-trip';
-import * as formUtils from './js/handler-form-utils';
-
 import * as luxon from 'luxon';
+
+import { handleAbout } from './js/about/handler-about';
+import { handleSubmit } from './js/search-form/search-form';
+import { handleTripClickEvent, displayTrips } from './js/trips/trips';
+import { getTrips, replaceTrips } from './js/store/trip-store';
+
+import * as formUtils from './js/search-form/search-form-utils';
+import * as typedefs from './js/types/typedefs';
 
 // Webpack magic.
 
@@ -21,7 +23,7 @@ import './styles/form.scss';
 import './styles/footer.scss';
 import './styles/trip.scss';
 
-import { readTrips } from './js/utils-api';
+import { readTrips } from './js/utilities/api-utils';
 
 // FIXME Disable Service Worker for the moment.
 // if ('serviceWorker' in navigator) {
@@ -40,22 +42,23 @@ import { readTrips } from './js/utils-api';
 // }
 
 document.addEventListener('DOMContentLoaded', async (_) => {
+  // We register theh 'Click' event handler for event delegation.
+  const tripsSection = document.getElementById('trips');
+  tripsSection.addEventListener('click', (event) => handleTripClickEvent(event));
+
   const [ok, data] = await readTrips();
   console.log('readTrips: ok=', ok, ', data=', data);
-  let refreshUi = true;
   if (!ok) {
     // Generic error message.
     const errMsg = `Failed to read trips. Try to reload the page later.`;
     // @ts-ignore: Property 'message' does not exist on type 'DestinationResult'.
     formUtils.showErrorSubmit(data.message);
-    refreshUi = false;
   } else {
-    loadTrips(data);
-    // We clear any error message.
-    formUtils.clearErrorSubmit();
-  }
-  console.log('readTrips: refreshUi', refreshUi);
-  if (refreshUi) {
+    /** @type { Array<typedefs.Trip> } */
+    // @ts-ignore: Type 'ApiError | Trip[]' is not assignable ...
+    const newTrips = data;
+    replaceTrips(newTrips);
+    // Refresh the UI.
     displayTrips(getTrips(), luxon.DateTime.now());
   }
 });

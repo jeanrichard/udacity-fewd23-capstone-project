@@ -14,6 +14,8 @@ body {
 
 .text-msg {
   display: none;
+  margin: 5px 0;
+  padding: 0.2rem;
 
   &--info {
     display: block;
@@ -47,7 +49,7 @@ body {
       margin-left: 0.2em;
       margin-right: 0.2em;
       font-weight: 700;
-      content: '!';
+      content: '\26A0';
     }
   }
 }

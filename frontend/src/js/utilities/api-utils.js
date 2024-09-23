@@ -2,8 +2,8 @@
 'use strict';
 
 // Project.
+import * as typedefs from '../types/typedefs';
 import * as utils from './utils';
-import * as typedefs from './typedefs';
 
 /*------------------------------------------------------------------------------------------------
  * Constants
@@ -23,8 +23,8 @@ const SEARCH_DESTINATION_ENDPOINT = `${BACKEND_API_BASE_URL}/search/destination`
 /**
  * API endpoint to retrieve the weather for a given location, in given number of days.
  */
-// const SEARCH_WEATHER_ENDPOINT = `${BACKEND_API_BASE_URL}/search/weather`;
-const SEARCH_WEATHER_ENDPOINT = `${BACKEND_API_BASE_URL}/search/test/weather`;
+const SEARCH_WEATHER_ENDPOINT = `${BACKEND_API_BASE_URL}/search/weather`;
+// const SEARCH_WEATHER_ENDPOINT = `${BACKEND_API_BASE_URL}/search/test/weather`;
 
 /**
  * API endpoint to retrieve a picture for a given location.
@@ -42,39 +42,36 @@ const TRIPS_ENDPOINT = `${BACKEND_API_BASE_URL}/trips`;
  *------------------------------------------------------------------------------------------------*/
 
 /**
- * Uses the API to find the destination.
+ * Uses the API to find a destination.
  *
- * @param {string} dest the query.
+ * @param {string} query - The query.
  * @return {Promise<[boolean, typedefs.DestinationResult]>} either `[true, data]` or `[false, error]`.
  */
-export async function getDestination(dest) {
-  console.log('getDestination: dest =', dest);
+export async function getDestination(query) {
+  console.log('getDestination: query=', query);
 
   // Generic error message.
-  const errMsg = `Failed to find destination for query '${dest}'.`;
+  const defaultErrMsg = `Failed to find destination for query '${query}'.`;
 
   try {
     const endpoint = SEARCH_DESTINATION_ENDPOINT;
-    console.log('getDestination: endpoint:', endpoint);
-
-    const [res, resData] = await utils.postData(endpoint, { query: dest });
+    const [res, resData] = await utils.timedPostData(endpoint, { query: query });
     console.log('getDestination: res.status=', res.status, ', resData=', resData);
 
     // We check the HTTP status code.
     if (!res.ok || resData === null) {
-      const finalErrMsg = resData?.message ? resData.message : errMsg;
-      return [false, { message: finalErrMsg }];
+      const errMsg = resData?.message ? resData.message : defaultErrMsg;
+      return [false, { message: errMsg }];
     }
 
     return [true, resData];
   } catch (err) {
-    console.log('getDestination: err:', err);
+    console.log('getDestination: err=', err);
     // If we are here, it is probably an issue with the API.
     return [
       false,
       {
-        message:
-          'Failed to find destination: an unexpected error happened. Please, try again later.',
+        message: [defaultErrMsg, 'Please, try again later.'].join(' '),
       },
     ];
   }
@@ -85,39 +82,38 @@ export async function getDestination(dest) {
  *------------------------------------------------------------------------------------------------*/
 
 /**
- * Uses the API to get the weather.
+ * Uses the API to get the weather for a given location.
  *
- * @param {number} lon the lon coordinate.
- * @param {number} lat the lat coordinate.
- * @param {number} numDays the desired number of days in the future.
+ * @param {number} lon - The lon coordinate.
+ * @param {number} lat - The lat coordinate.
+ * @param {number} numDays - The desired number of days in the future.
  * @return {Promise<[boolean, typedefs.WeatherResult]>}} either `[true, data]` or `[false, error]`.
  */
 export async function getWeather(lon, lat, numDays) {
   console.log('getWeather: lon=', lon, ', lat=', lat, ', numDays=', numDays);
 
   // Generic error message.
-  const errMsg = `Failed to get weather for given location.`;
+  const defaultErrMsg = `Failed to get weather for given location.`;
 
   try {
     const endpoint = SEARCH_WEATHER_ENDPOINT;
-    console.log('getWeather: endpoint:', endpoint);
-
-    const [res, resData] = await utils.postData(endpoint, { lon, lat, numDays });
+    const [res, resData] = await utils.timedPostData(endpoint, { lon, lat, numDays });
     console.log('getWeather: res.status=', res.status, ', resData=', resData);
 
     // We check the HTTP status code.
     if (!res.ok || resData === null) {
+      const errMsg = resData?.message ? resData.message : defaultErrMsg;
       return [false, { message: errMsg }];
     }
 
     return [true, resData];
   } catch (err) {
-    console.log('getWeather: err:', err);
+    console.log('getWeather: err=', err);
     // If we are here, it is probably an issue with the API.
     return [
       false,
       {
-        message: `Failed to get weather for given location: an unexpected error happened. Please, try again later.`,
+        message: [defaultErrMsg, 'Please, try again later.'].join(' '),
       },
     ];
   }
@@ -128,38 +124,37 @@ export async function getWeather(lon, lat, numDays) {
  *------------------------------------------------------------------------------------------------*/
 
 /**
- * Uses the API to find a picture.
+ * Uses the API to find a picture for a given location.
  *
- * @param {string} name the destination name.
- * @param {string} countryName the destination country name.
+ * @param {string} name - The destination name.
+ * @param {string} countryName - The destination country name.
  * @return {Promise<[boolean, typedefs.PictureResult]>} either `[true, data]` or `[false, error]`.
  */
 export async function getPicture(name, countryName) {
   console.log('getPicture: name=', name, ', countryName=', countryName);
 
   // Generic error message.
-  const errMsg = 'Failed to find picture for given location.';
+  const defaultErrMsg = 'Failed to find picture for given location.';
 
   try {
     const endpoint = SEARCH_PICTURE_ENDPOINT;
-    console.log('getPicture: endpoint:', endpoint);
-
-    const [res, resData] = await utils.postData(endpoint, { name, countryName });
+    const [res, resData] = await utils.timedPostData(endpoint, { name, countryName });
     console.log('getPicture: res.status=', res.status, ', resData=', resData);
 
     // We check the HTTP status code.
     if (!res.ok || resData === null) {
+      const errMsg = resData?.message ? resData.message : defaultErrMsg;
       return [false, { message: errMsg }];
     }
 
     return [true, resData];
   } catch (err) {
-    console.log('getPicture: err:', err);
+    console.log('getPicture: err=', err);
     // If we are here, it is probably an issue with the API.
     return [
       false,
       {
-        message: `Failed to find picture for given location: an unexpected error happened. Please, try again later.`,
+        message: [defaultErrMsg, 'Please, try again later.'].join(' '),
       },
     ];
   }
@@ -169,105 +164,117 @@ export async function getPicture(name, countryName) {
  * Trips
  *------------------------------------------------------------------------------------------------*/
 
+/**
+ * Uses the API to read all trips from the backend.
+ *
+ * @return {Promise<[boolean, typedefs.ApiError | Array<typedefs.Trip>]>} either `[true, data]` or
+ * `[false, error]`.
+ */
 export async function readTrips() {
-  console.log('readTrips');
+  console.log('loadTrips');
 
   // Generic error message.
-  const errMsg = `Failed to read trips.`;
+  const defaultErrMsg = 'Failed to load trips.';
 
   try {
-    const url = TRIPS_ENDPOINT;
-    console.log('readTrips: url:', url);
-
-    const [res, resData] = await utils.simpleGet(url);
+    const endpoint = TRIPS_ENDPOINT;
+    const [res, resData] = await utils.timedGet(endpoint);
     console.log('readTrips: res.status=', res.status, ', resData=', resData);
 
     // We check the HTTP status code.
     if (!res.ok || resData === null) {
-      const finalErrMsg = resData?.message ? resData.message : errMsg;
-      return [false, { message: finalErrMsg }];
+      const errMsg = resData?.message ? resData.message : defaultErrMsg;
+      return [false, { message: errMsg }];
+    }
+
+    // We need to add a few properties.
+    for (const trip of resData) {
+      trip.isSaved = true;
     }
 
     return [true, resData];
   } catch (err) {
-    console.log('getTrips: err:', err);
+    console.log('loadTrips: err=', err);
     // If we are here, it is probably an issue with the API.
     return [
       false,
       {
-        message: [errMsg, 'Please, try again later.'].join(' '),
+        message: [defaultErrMsg, 'Please, try again later.'].join(' '),
       },
     ];
   }
 }
 
 /**
+ * Uses the API to delete a given trip from the backend.
  *
- * @param {string} tripId
+ * @param {string} tripId - The ID of the trip to delete from the backend.
+ * @return {Promise<[boolean, typedefs.PictureResult]>} either `[true, data]` or `[false, error]`.
  */
 export async function deleteTrip(tripId) {
   console.log('deleteTrip: tripId =', tripId);
 
   // Generic error message.
-  const errMsg = `Failed to delete trip.`;
+  const defaultErrMsg = 'Failed to delete trip.';
 
   try {
     const url = `${TRIPS_ENDPOINT}/${tripId}`;
-    console.log('deleteTrip: url:', url);
-
-    const [res, resData] = await utils.simpleDelete(url);
+    const [res, resData] = await utils.timedDelete(url);
     console.log('deleteTrip: res.status=', res.status, ', resData=', resData);
 
     // We check the HTTP status code.
     if (!res.ok || resData === null) {
-      const finalErrMsg = resData?.message ? resData.message : errMsg;
-      return [false, { message: finalErrMsg }];
+      const errMsg = resData?.message ? resData.message : defaultErrMsg;
+      return [false, { message: errMsg }];
     }
 
     return [true, resData];
   } catch (err) {
-    console.log('deleteTrip: err:', err);
+    console.log('deleteTrip: err=', err);
     // If we are here, it is probably an issue with the API.
     return [
       false,
       {
-        message: [errMsg, 'Please, try again later.'].join(' '),
+        message: [defaultErrMsg, 'Please, try again later.'].join(' '),
       },
     ];
   }
 }
 
 /**
+ * Uses the API to create a trip in the backend.
  *
- * @param {string} tripId
- * @param {typedefs.Trip} tripObj
+ * @param {typedefs.Trip} trip - The trip to create in the backend.
  */
-export async function saveTrip(tripId, tripObj) {
-  console.log('saveTrip: tripId =', tripId);
+export async function createTrip(trip) {
+  console.log('createTrip: trip=', trip);
 
   // Generic error message.
-  const errMsg = `Failed to save trip. Please, try again later.`;
+  const defaultErrMsg = `Failed to create trip. Please, try again later.`;
 
   try {
     const url = `${TRIPS_ENDPOINT}`;
-    console.log('saveTrip: url:', url);
 
     // We need to drop a few properties.
-    const { tripId, isSaved, ...useTripObj } = tripObj;
+    const { tripId, isSaved, ...tripToSend } = trip;
 
-    const [res, resData] = await utils.postData(url, useTripObj);
-    console.log('saveTrip: res.status=', res.status, ', resData=', resData);
+    const [res, resData] = await utils.timedPostData(url, tripToSend);
+    console.log('createTrip: res.status=', res.status, ', resData=', resData);
 
     // We check the HTTP status code.
     if (!res.ok || resData === null) {
-      const finalErrMsg = resData?.message ? resData.message : errMsg;
+      const finalErrMsg = resData?.message ? resData.message : defaultErrMsg;
       return [false, { message: finalErrMsg }];
     }
 
     return [true, resData];
   } catch (err) {
     // If we are here, it is probably an issue with the API.
-    console.log('saveTrip: err:', err);
-    return [false, errMsg];
+    return [
+      false,
+      {
+        message: [defaultErrMsg, 'Please, try again later.'].join(' '),
+      },
+    ];
   }
 }

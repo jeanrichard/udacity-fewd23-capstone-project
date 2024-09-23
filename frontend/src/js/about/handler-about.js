@@ -3,7 +3,8 @@
 
 /**
  * Handles a click event on the 'About' link.
- * @param {Event} event the click event.
+ *
+ * @param {Event} event - The click event.
  */
 export function handleAbout(event) {
   console.log('::: About information requested :::');

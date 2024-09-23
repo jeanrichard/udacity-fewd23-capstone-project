@@ -11,11 +11,11 @@ enableFetchMocks();
 import { afterEach, beforeEach, describe, expect, jest, it } from '@jest/globals';
 
 import {
-  WEATHER_KIND_CURRENT,
-  WEATHER_KIND_FORECAST,
-  IMAGE_DESC,
-  tripEltFromObj,
-} from '../src/js/utils-trip.js';
+  _WEATHER_KIND_CURRENT,
+  _WEATHER_KIND_FORECAST,
+  _IMAGE_DESC,
+  _tripEltFromObj,
+} from '../src/js/trips/trips-utils';
 
 /**
  * Returns a subset of 'index.html' useful for the test.
@@ -70,6 +70,7 @@ function makeTripSnippet() {
 
 function makeTripObjCurrent(dateDeparting, dateReturning) {
   return {
+    tripId: '36b8f84d-df4e-4d49-b662-bcde71a8764f',
     destination: {
       lon: '7.13476',
       lat: '47.11682',
@@ -91,11 +92,13 @@ function makeTripObjCurrent(dateDeparting, dateReturning) {
     picture: {
       imageUrl: 'https://cdn.pixabay.com/photo/2023/11/25/15/45/mountains-8411954_150.jpg',
     },
+    isSaved: false,
   };
 }
 
 function makeTripObjForecast(dateDeparting, dateReturning) {
   return {
+    tripId: '36b8f84d-df4e-4d49-b662-bcde71a8764f',
     destination: {
       lon: '7.13476',
       lat: '47.11682',
@@ -117,6 +120,7 @@ function makeTripObjForecast(dateDeparting, dateReturning) {
     picture: {
       imageUrl: 'https://cdn.pixabay.com/photo/2023/11/25/15/45/mountains-8411954_150.jpg',
     },
+    isSaved: false,
   };
 }
 
@@ -140,7 +144,7 @@ describe('Testing functionality to get an HTML trip from an object ', () => {
 
     // Act.
 
-    tripEltFromObj(tripElt, tripObj, now);
+    _tripEltFromObj(tripElt, tripObj, now);
     // console.debug(document.body.innerHTML);
 
     // Assert.
@@ -149,7 +153,7 @@ describe('Testing functionality to get an HTML trip from an object ', () => {
     /** @type {HTMLImageElement} */
     // @ts-ignore Type 'HTMLImageElement | null' is not assignable ... .
     const imageElt = tripElt.querySelector('.trip__image img');
-    expect(imageElt.alt).toBe(IMAGE_DESC);
+    expect(imageElt.alt).toBe(_IMAGE_DESC);
     expect(imageElt.src).toBe(tripObj.picture.imageUrl);
 
     // Header.
@@ -180,7 +184,7 @@ describe('Testing functionality to get an HTML trip from an object ', () => {
 
     // Weather.
     expect(tripElt.querySelector('.trip__weather')?.getAttribute('data-weather-kind')).toBe(
-      WEATHER_KIND_CURRENT,
+      _WEATHER_KIND_CURRENT,
     );
     expect(tripElt.querySelector('.trip__weather-current .temp')?.textContent).toBe(
       tripObj.weather.temp,
@@ -214,14 +218,14 @@ describe('Testing functionality to get an HTML trip from an object ', () => {
     expect(tripElt).not.toBeNull(); // We make sure that the test is properly configured.
 
     // Act.
-    tripEltFromObj(tripElt, tripObj, now);
+    _tripEltFromObj(tripElt, tripObj, now);
     // console.debug(document.body.innerHTML);
 
     // Assert.
 
     // Weather.
     expect(tripElt.querySelector('.trip__weather')?.getAttribute('data-weather-kind')).toBe(
-      WEATHER_KIND_FORECAST,
+      _WEATHER_KIND_FORECAST,
     );
     expect(tripElt.querySelector('.trip__weather-forecast .temp')?.textContent).toBe(
       tripObj.weather.temp,

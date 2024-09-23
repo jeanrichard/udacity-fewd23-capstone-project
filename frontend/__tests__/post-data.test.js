@@ -7,7 +7,7 @@ import { enableFetchMocks } from 'jest-fetch-mock';
 enableFetchMocks();
 
 // Project.
-import { postData } from '../src/js/utils.js';
+import { timedPostData } from '../src/js/utilities/utils';
 
 const MOCK_DATA = {
   value: 42,
@@ -33,7 +33,7 @@ describe('Testing functionality to POST a request and return a pair (response, J
 
     expect.assertions(1); // We should go to the 'catch' block.
     try {
-      await postData('https//example.com/');
+      await timedPostData('https//example.com/');
     } catch (err) {
       expect(err).toMatch('network is down');
     }
@@ -42,14 +42,14 @@ describe('Testing functionality to POST a request and return a pair (response, J
   it('returns a pair (response, null) if the server does not send JSON', async () => {
     // @ts-ignore: Property 'mockRejectOnce' does not exist on type ... .
     fetch.mockResponseOnce('not-a-valid-JSON-string', 404);
-    const [_res, resData] = await postData('http://example.com/');
+    const [_res, resData] = await timedPostData('http://example.com/');
     expect(resData).toBeNull();
   });
 
   it('returns a pair (response, JSON) if the server sends JSON', async () => {
     /** @ts-ignore: Property 'mockRejectOnce' does not exist on type ... */
     fetch.mockResponseOnce(JSON.stringify(MOCK_DATA));
-    const [_res, resData] = await postData('http://example.com/');
+    const [_res, resData] = await timedPostData('http://example.com/');
     expect(resData).not.toBeNull();
     expect(resData).toStrictEqual(MOCK_DATA);
   });

@@ -9,20 +9,21 @@ import * as luxon from 'luxon';
  *------------------------------------------------------------------------------------------------*/
 
 /**
- * Defautl timeout (ms) for `fetch` calls.
+ * Default timeout (in milliseconds) for `fetch` calls.
  * @type {number}
  */
-const DEFAULT_TIMEOUT_MS = 5_000; // 5 seconds.
+export const DEFAULT_TIMEOUT_MS = 5_000; // 5 seconds.
 
 /*------------------------------------------------------------------------------------------------
- * Utilities
+ * General utilities
  *------------------------------------------------------------------------------------------------*/
 
 /**
  * Returns the number of remaining days until a given date.
- * @param {luxon.DateTime} date the given date.
- * @param {luxon.DateTime} now the current date.
- * @return {number} the number of the days as an integer.
+ *
+ * @param {luxon.DateTime} date - The given date & time.
+ * @param {luxon.DateTime} now - The current date & time.
+ * @return {number} the number of days, rounded up to the nearest integer.
  */
 export function getNumRemainingDays(date, now) {
   const dateSod = date.startOf('day');
@@ -30,12 +31,19 @@ export function getNumRemainingDays(date, now) {
   return Math.ceil(dateSod.diff(nowSod, 'days').days);
 }
 
+/*------------------------------------------------------------------------------------------------
+ * Utilities for `fetch`
+ *------------------------------------------------------------------------------------------------*/
+
 /**
  * Behaves similar to `fetch` but enforces a strict timeout and returns a pair
  * (response, deserialized-JSON).
- * @param {string | URL | globalThis.Request} input same as `fetch`.
- * @param {RequestInit} [init] same as `fetch`.
- * @param {number} timeoutMs the timeout (milliseconds).
+ *
+ * May throw the same exceptions as 'fetch'.
+ *
+ * @param {string | URL | globalThis.Request} input - Same as `fetch`.
+ * @param {RequestInit} [init] - Same as `fetch`.
+ * @param {number} timeoutMs - The timeout (in milliseconds).
  * @returns {Promise<[Response, any]>} as described above.
  */
 async function timedFetch(input, init, timeoutMs = DEFAULT_TIMEOUT_MS) {
@@ -66,12 +74,12 @@ async function timedFetch(input, init, timeoutMs = DEFAULT_TIMEOUT_MS) {
  *
  * May throw the same exceptions as 'fetch'.
  *
- * @param {string} url the URL to use.
- * @param {any} data the data to send (will be serialized to JSON).
- * @param {number} timeoutMs the timeout, in ms (optional).
+ * @param {string} url - The URL to use.
+ * @param {any} data - The data to send (will be serialized to JSON).
+ * @param {number} timeoutMs - The timeout (in milliseconds).
  * @returns {Promise<[Response, any]>} as described above.
  */
-export async function postData(url, data = {}, timeoutMs = DEFAULT_TIMEOUT_MS) {
+export async function timedPostData(url, data = {}, timeoutMs = DEFAULT_TIMEOUT_MS) {
   /** @type {RequestInit} */
   const init = {
     method: 'POST',
@@ -90,11 +98,11 @@ export async function postData(url, data = {}, timeoutMs = DEFAULT_TIMEOUT_MS) {
  *
  * May throw the same exceptions as 'fetch'.
  *
- * @param {string} url the URL to use.
- * @param {number} timeoutMs the timeout, in ms (optional).
+ * @param {string} url - The URL to use.
+ * @param {number} timeoutMs - The timeout (in milliseconds).
  * @returns {Promise<[Response, any]>} as described above.
  */
-export async function simpleGet(url, timeoutMs = DEFAULT_TIMEOUT_MS) {
+export async function timedGet(url, timeoutMs = DEFAULT_TIMEOUT_MS) {
   /** @type {RequestInit} */
   const init = {
     method: 'GET',
@@ -108,11 +116,11 @@ export async function simpleGet(url, timeoutMs = DEFAULT_TIMEOUT_MS) {
  *
  * May throw the same exceptions as 'fetch'.
  *
- * @param {string} url the URL to use.
- * @param {number} timeoutMs the timeout, in ms (optional).
+ * @param {string} url - The URL to use.
+ * @param {number} timeoutMs - The timeout (in milliseconds).
  * @returns {Promise<[Response, any]>} as described above.
  */
-export async function simpleDelete(url, timeoutMs = DEFAULT_TIMEOUT_MS) {
+export async function timedDelete(url, timeoutMs = DEFAULT_TIMEOUT_MS) {
   /** @type {RequestInit} */
   const init = {
     method: 'DELETE',

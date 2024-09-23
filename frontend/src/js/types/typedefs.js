@@ -1,7 +1,7 @@
 // @ts-check
 'use strict';
 
-// WARNING: Copied from 'server/typedefs.mjs'. Should be kept in sync.
+// WARNING: Destination/Weather/Picture should be kept in sync with backend.
 
 /**
  * Generic error.
@@ -84,6 +84,19 @@
  * @property {Weather} weather the weather information.
  * @property {Picture} picture the picture selected for the destination.
  * @property {boolean} isSaved `true` if saved on the backend, `false` otherwise.
+ */
+
+/**
+ * Trip result.
+ * @typedef {ApiError|Trip} TripResult
+ */
+
+/*------------------------------------------------------------------------------------------------
+ * Only in frontend
+ *------------------------------------------------------------------------------------------------*/
+
+/**
+ * @typedef {Array<Trip>} TripList
  */
 
 export {};

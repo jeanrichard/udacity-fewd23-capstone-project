@@ -127,7 +127,7 @@
     }
   }
 
-  &__btns {
+  &__buttons {
     display: flex;
     flex-direction: row;
     justify-content: start;
@@ -138,6 +138,10 @@
     // font-size: 0.9rem;
     width: 8rem;
     padding: 5px 20px;
+  }
+
+  .text-msg--info {
+    background-color: var(--color5);
   }
 
   &--is-past {

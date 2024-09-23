@@ -6,11 +6,7 @@ import * as luxon from 'luxon';
 import { describe, expect, it } from '@jest/globals';
 
 // Project.
-import {
-  MAX_YEARS_FROM_NOW,
-  validateDate,
-  validateDestination,
-} from '../src/js/handler-form-utils';
+import { validateDate, validateDestination } from '../src/js/search-form/search-form-utils';
 
 /*------------------------------------------------------------------------------------------------
  * Utilities to validate inputs
@@ -29,7 +25,7 @@ describe("Testing 'validateDestination'", () => {
     // Assert.
     expect(isValid).toBe(false);
     expect(value).toEqual(expect.any(String));
-    expect(value).toMatch(/^Destination cannot be empty/);
+    expect(value).toMatch(/^Please, enter a destination/);
   });
 
   it('detects when the destination is blank', () => {
@@ -40,7 +36,7 @@ describe("Testing 'validateDestination'", () => {
     // Assert.
     expect(isValid).toBe(false);
     expect(value).toEqual(expect.any(String));
-    expect(value).toMatch(/^Destination cannot be empty/);
+    expect(value).toMatch(/^Please, enter a destination/);
   });
 
   it('return the result when valid', () => {
@@ -70,7 +66,7 @@ describe("Testing 'validateDate'", () => {
     // Assert.
     expect(isValid).toBe(false);
     expect(value).toEqual(expect.any(String));
-    expect(value).toMatch(/^Date cannot be empty/);
+    expect(value).toMatch(/^Please, enter a date/);
   });
 
   it('detects when the date is blank', () => {
@@ -81,7 +77,7 @@ describe("Testing 'validateDate'", () => {
     // Assert.
     expect(isValid).toBe(false);
     expect(value).toEqual(expect.any(String));
-    expect(value).toMatch(/^Date cannot be empty/);
+    expect(value).toMatch(/^Please, enter a date/);
   });
 
   const nowStr = '2024-08-08T12:00:00';
@@ -94,7 +90,7 @@ describe("Testing 'validateDate'", () => {
     // Assert.
     expect(isValid).toBe(false);
     expect(value).toEqual(expect.any(String));
-    expect(value).toMatch(/^Date is invalid/);
+    expect(value).toMatch(/^Invalid date/);
   });
 
   it('detects when the date is in the past', () => {
@@ -105,7 +101,7 @@ describe("Testing 'validateDate'", () => {
     // Assert.
     expect(isValid).toBe(false);
     expect(value).toEqual(expect.any(String));
-    expect(value).toMatch(/^Date cannot be before/);
+    expect(value).toMatch(/^Invalid date: date cannot be before/);
   });
 
   it('detects when the date is too many years in the future', () => {
@@ -116,6 +112,6 @@ describe("Testing 'validateDate'", () => {
     // Assert.
     expect(isValid).toBe(false);
     expect(value).toEqual(expect.any(String));
-    expect(value).toMatch(/^Date cannot be after/);
+    expect(value).toMatch(/^Invalid date: date cannot be after/);
   });
 });
