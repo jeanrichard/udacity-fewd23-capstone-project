@@ -5,132 +5,115 @@ Front End Web Developer (2023-2024).
 
 **ⓘ Note:** There was no starter project for this project.
 
-**COPIED FROM PROJECT 4 - NEEDS TO BE UPDATED**
-
-
-THINGS TO MENTION:
- * Dealing with images that do not necessarily have the expected aspect ratio.
-   --> Explain solution
- * How to guarantee in the backend that information collected from multiple APIs in the frontend are valid when submitted?
-   --> Explain ideas:
-   1/ Redo everything. Maybe use caching, especially with metered APIs.
-   2/ Define a query ID that is provided to each API. APIs use it to sign their reply. Backend get signed pieces and validate.
-
-
-  /* See https://github.com/fast-average-color/fast-average-color */
-
-https://express-validator.github.io/docs/api/validation-chain/
-https://github.com/validatorjs/validator.js#sanitizers
-https://expressjs.com/en/advanced/healthcheck-graceful-shutdown.html
-
-https://www.taniarascia.com/javascript-mvc-todo-app/
-https://frontendmasters.com/blog/vanilla-javascript-todomvc/
-https://github.com/validatorjs/validator.js
-https://express-validator.github.io/docs/api/validation-chain/
-
-https://www.freecodecamp.org/news/how-to-build-explicit-apis-with-openapi/
-
 Content:
 
-- [1. Instructions](#instructions)
-  - Installation
-  - Configuration
+- [1. Quick Start](#quick-start)
+  - Prerequisites
+  - Installation and configuration
+    - Frontend
+    - Backend
   - Running in development
   - Running in production
+- [2. Developing](#developing)
   - Running the tests
-  - Formatting and linting the code
-- [2. Design notes](#design-notes)
-- [3. Sources and assets](#sources-and-assets)
-- [4. Additional references](#additional-references)
-- [5. Tools used](#tools-used)
-- [6. How to use Dev Containers](#how-to-use-dev-containers)
+    - Frontend
+    - Backend
+  - Formatting the code
+    - Frontend
+    - Backend
+  - Linting the code
+    - Frontend
+    - Backend
+- [3. Design notes](#design-notes)
+- [4. Sources and assets](#sources-and-assets)
+- [5. Additional references](#additional-references)
+- [6. Tools used](#tools-used)
+- [7. How to use Dev Containers](#how-to-use-dev-containers)
 
-Examples queries for the API:
+<a id="quick-start"></a>
 
+## 1. Quick Start
+
+Instead of having a single mixed project, we decided to split the project into 2 sub-projects, _frontend_ and _backend_, with their own set of dependencies (and thus their own *package.json*).
+
+### Prerequisites
+
+This project makes use of 3 external services. You will need to sign-up and have credentials for each of them.
+
+**GeoNames:**
+- [GeoNames](https://geonames.org) is a comprehensive geographical database that provides information on millions of places worldwide, including cities, regions, and natural features. It offers a range of APIs, such as search, reverse geocoding, and postal code lookups.
+- You can create an account [here](http://www.geonames.org/login).
+- We use the [GeoNames Search API](https://www.geonames.org/export/geonames-search.html) to find the destination entered by the user.
+
+**WeatherBit:**
+- [WeatherBit](https://www.weatherbit.io/) provides a comprehensive suite of real-time, historical and forecast weather data globally, offering detailed meteorological information like temperature, precipitation, and air quality. Those data are accessible through a range of APIs.
+- You can create an account [here](https://www.weatherbit.io/account/create).
+- We use the [Current Weather API](https://www.weatherbit.io/api/weather-current) to get the current weather at the destination, and the [Weather Forecast API](https://www.weatherbit.io/api/weather-forecast-api) to get the weather forecast at the destination (note that we get only 7 days in the future with the Free plan).
+
+**Pixabay:**
+- [Pixabay](https://pixabay.com/) offers a vast library of free, high-quality images, videos, and illustrations, allowing users to search, download, and integrate royalty-free media into their projects. An API provides free access to that library, with options for advanced search and filters.
+- You can create an account by clicking the _Join_ button on the landing page.
+- The documentation for the API is [here](https://pixabay.com/service/about/api/).
+
+Moreover, this project is built with [Node.js](https://nodejs.org/) (version 20) and managed with `npm`. For convenience, it was developed using [Development Containers](https://containers.dev/), but this is not a hard requirement. Any local installation of a suitable version of Node (e.g., with [nvm](https://github.com/nvm-sh/nvm)) should work. See also [7. How to use Dev Containers](#how-to-use-dev-containers).
+
+### Installation and configuration
+
+**🛈 Note:** For the sake of brevity, we assume that _Shell 1_ is always at the root of the _frontend_ sub-project:
 ```bash
-# Get destination.
-curl -d '{"query": "Lamboing"}' -H "Content-Type: application/json" -X POST http://localhost:3000/geo-search
-# Get current weather.
-curl -d '{"lng": 7.13476, "lat": 47.11682, "numDays": 1}' -H "Content-Type: application/json" -X POST http://localhost:3000/getWeather
-# Get weather forecasts.
-curl -d '{"lng": 7.13476, "lat": 47.11682, "numDays": 2}' -H "Content-Type: application/json" -X POST http://localhost:3000/getWeather
-
-# Test destination.
-curl -d '{"query": "Lamboing"}' -H "Content-Type: application/json" -X POST http://localhost:3000/test/getDestination
-# Test current weather.
-curl -d '{"lng": 7.13476, "lat": 47.11682, "numDays": 1}' -H "Content-Type: application/json" -X POST http://localhost:3000/test/getWeather
-# Test weather forecasts.
-curl -d '{"lng": 7.13476, "lat": 47.11682, "numDays": 2}' -H "Content-Type: application/json" -X POST http://localhost:3000/test/getWeather
-
+# Shell 1
+cd frontend
+```
+And that _Shell 2_ is always at the root of the _backend_ sub-project:
+```bash
+# Shell 2
+cd backend
 ```
 
-THOUGHTS
+#### Frontend
 
-- Currently, the client pieces a trip by calling multiple API endpoints. Pros: Simple Cons:
-  Malicious user could create a trip that, although harmless, violates the invariant that the
-  destination exists, etc.
-- Idea 1: Create "draft" resource on the backend. Maximum of drafts per user. Periodically deleted.
-- Idea 2: API endpoint return piece of information + signature. When the client composes multiple
-  pieces of infomration, it also sends the signatures to prove that they are legitimate. Sounds
-  complicated.
-
-<a id="instructions"></a>
-
-## Instructions
-
-This project consists of 2 components:
-
-- **Front-end**: The front-end is a single page application (SPA). It allows ...
-- **Back-end**: The back-end is an API. It is responsible for ...
-
-Here is a screenshot of the front-end.
-
-<img
-  src="./assets/app-screenshot.png"
-  alt="A screenshot of the front-end showing ..."
-  width="50%"
-/>
-
-### Installation
-
-This projet is built with [Node.js](https://nodejs.org/) (version 22) and managed with `npm`. For
-convenience, it was developed using [Development Containers](https://containers.dev/), but this is
-not a hard requirement. Any local installation of a suitable verison of Node (e.g., with
-[nvm](https://github.com/nvm-sh/nvm)) should work.
-
-To install all the dependencies:
-
+Open a shell and install the dependencies:
 ```bash
+# Shell 1.
 npm install
 ```
 
-### Configuration
+#### Backend
 
-The back-end reads your MeaningCloud API key from a [_.env_](https://www.npmjs.com/package/dotenv)
-file:
+Open a shell and install the dependencies:
+```bash
+# Shell 2.
+npm install
+```
 
-- Create a _.env_ file at the root of the project.
-- Configure your API key:
+Configure the backend:
+
+- Create a _.env_ file (mind the leading dot).
+- Edit the file to add the credentials for the 3 services mentioned above:
   ```shell
-  MEANING_CLOUD_API_KEY="<your-API-key>"
+  GEONAMES_USERNAME=<your-geonames-username>
+  WEATHERBIT_API_KEY=<your-weatherbit-api-key>
+  PIXABAY_API_KEY=<your-pixabay-api-key>
   ```
 
-### Run in development
+### Running in development
 
 **Option 1.** Run the project using the
 [Webpack Development Server](https://webpack.js.org/configuration/dev-server/):
 
-- Open a 1st shell and start serving the front-end with the Webpack Development Server:
+- Open a shell and start serving the front-end with the Webpack Development Server:
   ```bash
   # Shell 1.
-  npm run serve-dev
+  npm run serve:dev
   ```
-- Open a 2nd shell and start the back-end:
+
+- Open a shell and start the back-end in development mode:
   ```bash
   # Shell 2.
-  npm run start-dev
+  npm run start:dev
   ```
-- Open a browser and navigate to http://localhost:8080/ (should be automatic if you are using Visual
+
+- Open a browser and navigate to http://localhost:8080/ (this should be automatic if you are using Visual
   Studio Code).
 
 This option is best suited for quick development as changes are immediately reflected in the UI
@@ -140,10 +123,15 @@ thanks to Hot Module Reloading (HMR).
 
 - Open a shell, make a development build and start the back-end:
   ```bash
-  npm run build-dev
-  npm run start-dev
+  # Shell 1.
+  npm run build:dev
   ```
-- Open a browser and navigate to http://localhost:3000/ (should be automatic if you are using Visual
+- Open a shell and start the back-end in development mode:
+  ```bash
+  # Shell 2.
+  npm run start:dev
+  ```
+- Open a browser and navigate to http://localhost:3000/ (this should be automatic if you are using Visual
   Studio Code).
 
 ### Running in production
@@ -152,65 +140,98 @@ Run the project using the back-end to serve a full production build:
 
 - Open a shell, make a production build and start the back-end:
   ```bash
-  npm run build-prod
-  npm run start-prod
+  # Shell 1.
+  npm run build:prod
   ```
-- Open a browser and navigate to http://localhost:3000/ (should be automatic if you are using Visual
+- Open a shell and start the back-end in production mode:
+  ```bash
+  # Shell 2.
+  npm run start:prod
+  ```
+- Open a browser and navigate to http://localhost:3000/ (this should be automatic if you are using Visual
   Studio Code).
+
+<a id="developing"></a>
+
+## 2. Developing
 
 ### Running the tests
 
-Units tests use [Jest](https://jestjs.io/).
+#### Frontend
 
-To run the tests:
+The units tests use [Jest](https://jestjs.io/) with a few add-ons (`jest-environment-jsdom` and `jest-fetch-mock`). 
 
-- Open a shell.
-  ```bash
-  npm run test
-  ```
+To run the tests, open a shell and run:
+```bash
+# Shell 1.
+npm run test
+```
 
-### Formatting and linting the code
+#### Backend
 
-#### Formatting
+The units tests use [Jest](https://jestjs.io/) with a few add-ons (`jest-fetch-mock`) as well as `supertest`.
+
+To run the tests, open a shell and run:
+```bash
+# Shell 2.
+npm run test
+```
+
+### Formatting the code
 
 We use [Prettier](https://prettier.io/) for formatting most files:
 
 - See the [_.prettierrc_](./.prettierrc) file at the root of the project.
-- To manually format all files:
-  ```bash
-  # At the root of the project.
-  npx prettier --write .
-  ```
 
-**Note:** We use the
+#### Frontend
+
+To format files:
+```bash
+# Shell 1.
+./reformat.sh
+```
+
+That little script also restores the `<!DOCTYPE html>` to uppercase (see [issue 15476](https://github.com/prettier/prettier/issues/15476) for details).
+
+**🛈 Note:** We use the
 [prettier-plugin-organize-attributes](https://www.npmjs.com/package/prettier-plugin-organize-attributes)
 plug-in to automatically reorder the attributes of HTML elements.
 
 We use [Stylelint](https://stylelint.io/) for formatting styles sheets (_\*.css_, _\*.scss_ and
 _\*.sass_ files):
 
-- See the [_.stylelintrc.json_](./.stylelintrc.json) file at the root of the project.
-- To manually format all style sheets:
+- See the [_.stylelintrc.json_](./frontend/.stylelintrc.json) file at the root of the _frontend_ sub-project.
+- To format style sheets:
   ```bash
-  # At the root of the project.
-  npx stylelint --fix "./src/client/styles/*.{css,scss,sass}"
+  # Shell 1.
+  npx stylelint --fix "./src/styles/*.{css,scss,sass}"
+  # Or:
+  DEBUG=stylelint:* npx stylelint --fix "./src/styles/*.{css,scss,sass}"
   ```
 
-**Note:** We use the
+**🛈 Note:** We use the
 [stylelint-config-idiomatic-order ](https://github.com/ream88/stylelint-config-idiomatic-order)
 plug-in to automatically reorder CSS properties according to
-[Principles of writing consistent, idiomatic CSS](https://github.com/necolas/idiomatic-css#declaration-order).
+[Principles of writing consistent, idiomatic CSS](https://github.com/necolas/idiomatic-css#declaration-order), plus a few other plug-ins.
 
-#### Linting
+#### Backend
+
+To format files:
+```bash
+# Shell 2.
+npx prettier --write .
+```
+
+### Linting the code
 
 We use [ESLint](https://marketplace.visualstudio.com/items?itemName=dbaeumer.vscode-eslint) for
-linting _\*.js_ files.
+linting _\*.js_ and _\*.mjs_ files.
 
-Moreover, since Visual Studio Code come with language support for JavaScript and TypeScript. We put
+Moreover, since Visual Studio Code comes with language support for JavaScript and TypeScript. We put
 `// @ts-check` at the top of all JavaScript files to benefit from the power of the TypeScript
 compiler. See
 [_JS Projects Utilizing TypeScript_](https://www.typescriptlang.org/docs/handbook/intro-to-js-ts.html).
-In summary, all source _\*.js_ files should start with:
+In summary, all source _\*.js_ and _\*.mjs_ files should start with:
 
 ```javascript
 // @ts-check
@@ -219,23 +240,58 @@ In summary, all source _\*.js_ files should start with:
 
 <a id="design-notes"></a>
 
-## Design notes
+## 3. Design notes
 
 ### Front-end
 
-As mentioned above, the front-end is a single page application (SPA). It allows ...
+As mentioned above, the front-end is a single page application (SPA). It allows the user to create a new trip based on:
+- A destination.
+- A date of departure.
+- A date of return.
 
-The normal flow is:
+The trips are listed under 3 categories:
+- Ongoing
+- Pending
+- Past
 
-- The front-end sends a request with ... to the back-end.
-- ...
+The _Ongoing_ and _Pending_ categories are sorted in chronological order while the _Past_ category is sorted in reverse chronological order.
+
+#### Flows
+
+Loading all trips:
+
+- When the frontend loads, it connects to the backend's `/trips` endpoint to GET all trips currently stored in the backend.
+
+Searching for a destination:
+
+- The front-end first connects to the backend's `/search/destination` endpoint, that uses the GeoNames Search API to do geo-coding. The destination entered by the user is treated as a query and resolved to a place-name, country-name and (lon, lat) coordinates. If an error occurs (e.g., if the destination cannot be found), we display an error and the flow stops.
+
+- The front-end then connects to the backend's `/search/weather` endpoint, that uses the WeatherBit API to get the weather at the (lon, lat) coordinates. If the trip is at most 1 day in the future, we use the Current Weather API. Otherwise, we use the Weather Forecast API. Note that we get only 7 days in the future with the Free plan. So even if the trip is planned more than 7 days in the future, we still use the 7-day forecast. If an error occurs (e.g., if no forecast is available), we display an error and the flow stops.
+
+- The front-end finally connects to the backend's `/search/picture` API endpoint, that uses the Pixabay API to find a picture for the destination, using "&lt;place-name&gt; &lt;country-name&gt;" as query. If an error occurs (i.e., if no picture is available), we simply display a place-holder.
+
+- The resulting trip is shown in the UI in the _Pending_ category. Note that the trip is in draft state and **not saved, yet**.
+
+Saving a trip:
+
+- The frontend connects to the backend's `/trips` endpoint and POSTs the new trip.
+- If an error occurs, we display an error.
+
+Deleting a trip:
+
+- The frontend connects to our `/trips/:tripId` endpoint to DELETE an existing trip.
+- If an error occurs, we display an error.
+
+#### Handling errors
 
 We try to handle the following classes of errors:
 
-- Invalid user input (e.g., ...).
+- Invalid user input (e.g., date in the past, date too far in the future, etc.).
 - Network issues. One measure is to have strict timeouts on all `fetch()` calls using an
   `AbortController` and `setTimeout()`.
 - Errors reported by the back-end (client errors, internal errors, etc.).
+
+#### Implementation
 
 Implementation:
 
@@ -253,6 +309,19 @@ Implementation:
 - We use [ECMAScript Modules](https://nodejs.org/docs/latest-v20.x/api/esm.html) (ESM) instead of
   [CommonJS Modules](https://nodejs.org/docs/latest-v20.x/api/modules.html) (CJS).
 
+Other notes:
+- As images returned by the Pixabay API can have different aspect ratios, we use the CSS rules below. An alternative would have been to resize while keeping the aspect ration and then to pad the picture, resulting in a pair of vertical or horizontal "bands" around the picture (whose color could be fixed or use the "average" color of the picture).
+  ```css
+  img {
+    width: 100%;
+    height: 100%;
+    /* Preserve aspect ratio while fitting inside the container. */
+    object-fit: cover;
+    /* Center the image within the container. */
+    object-position: center;
+  }
+  ```
+
 Tests:
 
 - Units tests use [Jest](https://jestjs.io/).
@@ -261,42 +330,74 @@ Tests:
     calls.
   - https://www.npmjs.com/package/jest-environment-jsdom for testing function that update the DOM.
 
-### Back-end
+#### What could be improved
 
-As mentioned above, the back-end is an API. It is responsible for ... In this iteration of the
-course, the 3rd party services are:
+User experience:
+- Allow the user to specify the country.
+- Instead of directly displaying a trip based on the best search result, display the search results on a separate page and let the user choose.
 
-- GeoNames (https://geonames.org): ... You can create an account
-  [here](http://www.geonames.org/login). The documentation for the web services is
-  [here](https://www.geonames.org/export/web-services.html).
-- Weatherbit (https://www.weatherbit.io/): ... You can create an acccount
-  [here](https://www.weatherbit.io/account/create). The documentation for the _Current Weather API_
-  is [here](https://www.weatherbit.io/api/weather-current). The documentation for the _Weather
-  Forecast API_ is [here](https://www.weatherbit.io/api/weather-forecast-api).
-- Pixabary (https://pixabay.com/): ... You can create an account by clicking the _Join_ button on
-  the landing page. The documentation for the API is [here](https://pixabay.com/service/about/api/).
-- REST Countries (https://restcountries.com/): ... You can create an account
+Implementation:
+- When we need to add a new trip, we clone a `<template>` element and then adjust the content. We could use a real template system instead.
+- Once the frontend has collected the needed pieces of information (destination, weather, picture) and POSTs the new trip to the `/trips` endpoint, we validate the properties of the object being posted, but we do not check that the weather and picture are really for the given destination. A malevolent user could e.g., use `curl` to post a trip with inconsistent data. Ideas:
+   - The frontend could POST only the destination. The backend would again collect the missing pieces of information (weather, picture). The backend could use caching to avoid paying multiple times when using metered 3rd party APIs.
+   - We could build the draft trip entirely on the backend. This seems to go against the REST principles and would require preventing unused draft trips from accumulating (maybe setting a maximum number of drafts per user once, authentication has been added).
+   - We could define a token that identifies the query (e.g., "&lt;place-name&gt;:&lt;country-name&gt;:&lt;lon/lat&gt;") and pass it to to the following `/search` endpoints. A given endpoint would returns the usual piece of information, plus a digest of the (token, data) pair. To create a new trip, the frontend would POST the token and all pieces of information and their digests. The backend would verify that all pieces of information have not been tampered and relate to the same token.
+- Refactor the frontend to use an MVC approach. Those references could be useful:
+  - [Writing a TodoMVC App with Modern Vanilla JavaScript](https://frontendmasters.com/blog/vanilla-javascript-todomvc/), Marc Grabanski, 2022.
+  - [How to Build a Simple MVC App From Scratch in JavaScript](https://www.taniarascia.com/javascript-mvc-todo-app/), Tania Rascia, 2019.
+- Build a better offline experience. This reference could be useful:
+  - [Progressive Web Apps (PWA) - The Complete Guide](https://www.udemy.com/course/progressive-web-app-pwa-the-complete-guide/) by Maximilian Schwarzmüller.
 
-https://www.meaningcloud.com/.
+### The backend
 
-The normal flow for the `/analyze-sentiment`endpoint is:
+As mentioned above, the back-end is an API. It is responsible for interacting with 3rd party APIs and for storing the trips in a mock data store.
 
-- The back-end receives a request from the client.
-- The back-end validates the request (and immediately sends an error response if needed).
-- The back-end sends a request with the target URL and other arguments to the Sentiment Analysis
-  API.
-- The Sentiment Analysis API sends a response back to the back-end.
-- The back-end processes the response. This mostly involes: (a) Reformatting the response to match
-  our own interface. (b) Mapping error codes specifc to the Sentiment Analysis API to our own error
-  messages. This would make it possible to swap the 3rd party service in the future.
-- The back-end sends a response with the results (or the error) to the client.
+Here is a brief description of the `search` endpoints:
+- `GET /search/destination`: Searches for a destination.
+  - Request validation: see [destination-validator.mjs](backend/src/middleware/search/destination-validator.mjs).
+  - Response: see `DestinationResult` in [typedefs.mjs](backend/src/types/typedefs.mjs).
+  - Implementation: see [destination-service.mjs](backend/src/services/search/destination-service.mjs).
+- `GET /search/weather`: Gets the weather for a given location.
+  - Request validation: see [weather-validator.mjs](backend/src/middleware/search/weather-validator.mjs).
+  - Response: see `WeatherResult` in [typedefs.mjs](backend/src/types/typedefs.mjs).
+  - Implementation: see [weather-service.mjs](backend/src/services/search/weather-service.mjs).
+- `GET /search/picture`: Finds a picture for a given location.
+  - Request validation: see [picture-validator.mjs](backend/src/middleware/search/picture-validator.mjs).
+  - Response: see `PictureResult` in [typedefs.mjs](backend/src/types/typedefs.mjs).
+  - Implementation: see [picture-service.mjs](backend/src/services/search/picture-service.mjs).
+
+When the backend run in development mode, we add the following endpoints that return canned data:
+- `GET /search/test/destination`
+- `GET /search/test/weather`
+- `GET /search/test/picture`
+
+Here is a brief description of the `trips` endpoints:
+
+- `POST /trips`: Adds a trip to the mock data store.
+  - Request validation: see [validate-create-trip.mjs](backend/src/middleware/trips/validate-create-trip.mjs).
+  - Response: returns an object of the form `{ "tripId": "<tripId>", "message": "<message>>" }`, where the `<tripId>` is the trip ID assigned by the backend.
+  - Implementation: see [trips-service.mjs](backend/src/services/trips/trips-service.mjs).
+- `GET /trips`: Returns all trips in the mock data store.
+  - Request validation: n/a.
+  - Response: returns an array of `Trip`; see `Trip` in [typedefs.mjs](backend/src/types/typedefs.mjs).
+  - Implementation: see [trips-service.mjs](backend/src/services/trips/trips-service.mjs).
+- `DELETE /trips/:tripId`: Removes a trip from the mock data store.
+  - Request validation: see [validate-delete-trip.mjs](backend/src/middleware/trips/validate-delete-trip.mjs).
+  - Response: returns an object of the form `{ "message": "<message>>" }`.
+  - Implementation: see [trips-service.mjs](backend/src/services/trips/trips-service.mjs).
+
+Those basically implement the CRD in CRUD (Create, Read, Update, Delete).
+
+#### Handling errors
 
 We try to handle the following classes of errors:
 
-- Invalid request (e.g., maformed target URL).
+- Invalid request (e.g., invalid (lon, lat) coordinates).
 - Network issues. One measure is to have strict timeouts on all `fetch()` calls using an
   `AbortController` and `setTimeout()`.
-- Errors reported by the Sentiment Analysis API (client errors, internal errors, etc.).
+- Errors reported by the 3rd party APIS.
+
+#### Implementation
 
 Implementation:
 
@@ -309,7 +410,7 @@ Implementation:
 
 <a id="sources-and-assets"></a>
 
-## 3. Sources and assets
+## 4. Sources and assets
 
 We added the following additional assets to the starter project:
 
@@ -317,14 +418,14 @@ We added the following additional assets to the starter project:
   attribution, see [Flaticon Terms of use](https://www.freepikcompany.com/legal#nav-flaticon) for
   details):
 
-  - [This icon](https://www.flaticon.com/free-icon/nlp_9716603?term=nlp&page=1&position=3&origin=tag&related_id=9716603)
-    from the [Nlp icons created by Freepik - Flaticon](https://www.flaticon.com/free-icons/nlp).  
-    Author: N/a  
+  - [This icon](https://www.flaticon.com/free-icon/world_1127988?term=trip&page=1&position=3&origin=style&related_id=1127988)
+    from the [Trip icons created by Prettycons - Flaticon](https://www.flaticon.com/free-icons/trip).  
+    Author: Prettycons  
     Use: Logo
 
 <a id="additional-references"></a>
 
-## 4. Additional references
+## 5. Additional references
 
 In addition to the material presented in the course, we used:
 
@@ -333,7 +434,7 @@ In addition to the material presented in the course, we used:
 
 <a id="tools-used"></a>
 
-## 5. Tools used
+## 6. Tools used
 
 - [Visual Studio Code](https://code.visualstudio.com/).  
   Use: IDE.  
@@ -367,7 +468,7 @@ In addition to the material presented in the course, we used:
 
 <a id="how-to-use-dev-containers"></a>
 
-## 6. How to use Dev Containers
+## 7. How to use Dev Containers
 
 To setup the environment:
 
@@ -376,7 +477,7 @@ To setup the environment:
 
    ```json
    {
-     "image": "mcr.microsoft.com/devcontainers/javascript-node:20"
+     "image": "mcr.microsoft.com/devcontainers/javascript-node:22-bookworm"
    }
    ```
 
@@ -385,7 +486,7 @@ To setup the environment:
 
 To run the project:
 
-1. Refer to the [Instructions](#instructions) section above.
+1. Refer to the [Quick Start](#quick-start) section above.
 2. Run:
 
    ```bash
