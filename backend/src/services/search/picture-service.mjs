@@ -82,7 +82,6 @@ function getPictureMakeUrl(q, apiKey) {
  */
 export async function getPicture(name, countryName, apiKey, timeoutMs = utils.DEFAULT_TIMEOUT_MS) {
   const fn = 'getPicture';
-  logger.info('entering', { fn, name, countryName, apiKey: sensitive(apiKey) });
 
   // Generic error message.
   const errMsg = `Failed to find picture for given location.`;
@@ -129,7 +128,6 @@ export async function getPicture(name, countryName, apiKey, timeoutMs = utils.DE
  */
 export function getPictureTest() {
   const fn = 'getPictureTest';
-  logger.info('entering', { fn });
 
   // Generic error message.
   const errMsg = 'Failed to find canned picture data.';

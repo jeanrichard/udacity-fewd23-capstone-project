@@ -12,7 +12,6 @@ import * as formUtils from './js/search-form/search-form-utils';
 import * as typedefs from './js/types/typedefs';
 
 // Webpack magic.
-
 import './assets/icons/logo.png';
 import './styles/resets.scss';
 import './styles/settings.scss';
@@ -25,25 +24,26 @@ import './styles/trip.scss';
 
 import { readTrips } from './js/utilities/api-utils';
 
-// FIXME Disable Service Worker for the moment.
-// if ('serviceWorker' in navigator) {
-//   // See https://webpack.js.org/guides/progressive-web-application/#registering-our-service-worker.
-//   console.log('Registering service worker...');
-//   window.addEventListener('load', () => {
-//     navigator.serviceWorker
-//       .register('/service-worker.js')
-//       .then((registration) => {
-//         console.log('SW registered: ', registration);
-//       })
-//       .catch((registrationError) => {
-//         console.log('SW registration failed: ', registrationError);
-//       });
-//   });
-// }
+// Service Worker.
+if ('serviceWorker' in navigator) {
+  // See https://webpack.js.org/guides/progressive-web-application/#registering-our-service-worker.
+  console.log('Registering service worker...');
+  window.addEventListener('load', () => {
+    navigator.serviceWorker
+      .register('/service-worker.js')
+      .then((registration) => {
+        console.log('SW registered: ', registration);
+      })
+      .catch((registrationError) => {
+        console.log('SW registration failed: ', registrationError);
+      });
+  });
+}
 
 document.addEventListener('DOMContentLoaded', async (_) => {
-  // We register theh 'Click' event handler for event delegation.
+  // We register the 'Click' event handler for event delegation.
   const tripsSection = document.getElementById('trips');
+  // @ts-ignore: 'tripsSection' is possibly 'null'.
   tripsSection.addEventListener('click', (event) => handleTripClickEvent(event));
 
   const [ok, data] = await readTrips();

@@ -14,8 +14,8 @@ body {
 
 .text-msg {
   display: none;
-  margin: 5px 0;
   padding: 0.2rem;
+  margin: 5px 0;
 
   &--info {
     display: block;
@@ -40,16 +40,16 @@ body {
   }
 
   &--error {
-    padding: 0.2rem;
     display: block;
+    padding: 0.2rem;
     background-color: #fcc;
     color: inherit;
 
     &::before {
-      margin-left: 0.2em;
       margin-right: 0.2em;
-      font-weight: 700;
+      margin-left: 0.2em;
       content: '\26A0';
+      font-weight: 700;
     }
   }
 }

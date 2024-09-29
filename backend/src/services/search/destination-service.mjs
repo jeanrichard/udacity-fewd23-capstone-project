@@ -93,7 +93,6 @@ function getDestinationMakeUrl(query, username, maxRows = 1) {
  */
 export async function getDestination(dest, username, timeoutMs = utils.DEFAULT_TIMEOUT_MS) {
   const fn = 'getDestination';
-  logger.info('entering', { fn, dest, username: sensitive(username) });
 
   // Generic error message.
   const errMsg = `Failed to find destination for query '${dest}'.`;
@@ -140,7 +139,6 @@ export async function getDestination(dest, username, timeoutMs = utils.DEFAULT_T
  */
 export function getDestinationTest() {
   const fn = 'getDestinationTest';
-  logger.info('entering', { fn });
 
   // Generic error message.
   const errMsg = 'Failed to find canned destination data.';

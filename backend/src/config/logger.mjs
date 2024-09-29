@@ -41,13 +41,18 @@ const logger = winston.createLogger({
  */
 export function sensitive(text, parts) {
   if (ENV === 'production') {
-    const toRedact = Array.isArray(parts) ? parts : [parts];
-    toRedact.forEach((part) => {
-      if (part) {
-        const redacted = '*'.repeat(part.length);
-        text = text.replaceAll(part, redacted);
-      }
-    });
+    console.log(`REDACTING`);
+    if (!parts) {
+      text = '*'.repeat(text.length);
+    } else {
+      const toRedact = Array.isArray(parts) ? parts : [parts];
+      toRedact.forEach((part) => {
+        if (part) {
+          const redacted = '*'.repeat(part.length);
+          text = text.replaceAll(part, redacted);
+        }
+      });
+    }
   }
   return text;
 }

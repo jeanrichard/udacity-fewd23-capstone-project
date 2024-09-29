@@ -24,6 +24,7 @@ export default {
     new HtmlWebpackPlugin({
       template: path.resolve(__dirname, './src/views/index.html'),
       filename: './index.html', // Relative to 'dist'.
+      favicon: './src/assets/icons/favicon.ico',
     }),
   ],
   output: {

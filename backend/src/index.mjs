@@ -43,7 +43,7 @@ if (__filename === process.argv[1]) {
     ['WEATHERBIT_API_KEY', config.weatherBitApiKey],
     ['PIXABAY_API_KEY', config.pixabayApiKey],
   ];
-  
+
   let credentialsAreDefined = true;
   for (const [name, value] of credentialPairs) {
     if (value === '') {
@@ -56,7 +56,7 @@ if (__filename === process.argv[1]) {
     logger.error('aborting');
     exit(2);
   }
-  
+
   // Build the app.
   const app = createApp(config);
 
@@ -64,8 +64,12 @@ if (__filename === process.argv[1]) {
 
   // Start the server.
   const server = app.listen(config.port, () => {
-    logger.info('starting Express app',{ host: 'localhost', port: config.port,
-      runEnv: config.runEnv, cwd: cwd() });
+    logger.info('starting Express app', {
+      host: 'localhost',
+      port: config.port,
+      runEnv: config.runEnv,
+      cwd: cwd(),
+    });
 
     // Validate the configuration.
     let closeServer = false;

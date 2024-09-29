@@ -134,7 +134,6 @@ function getWeatherCurrentMakeUrl(lon, lat, apiKey) {
  */
 async function getWeatherCurrent(lon, lat, apiKey, timeoutMs = utils.DEFAULT_TIMEOUT_MS) {
   const fn = 'getWeatherCurrent';
-  logger.info('entering', { fn, lng: lon, lat, apiKey: sensitive(apiKey) });
 
   // Generic error message.
   const errMsg = 'Failed to get current weather for given location.';
@@ -204,7 +203,6 @@ function getWeatherForecastMakeUrl(lon, lat, apiKey) {
  */
 async function getWeatherForecast(lon, lat, apiKey, timeoutMs = utils.DEFAULT_TIMEOUT_MS) {
   const fn = 'getWeatherForecast';
-  logger.info('entering', { fn, lng: lon, lat, apiKey: sensitive(apiKey) });
 
   // Generic error message.
   const errMsg = 'Failed to get weather forecast for given location.';
@@ -244,9 +242,9 @@ async function getWeatherForecast(lon, lat, apiKey, timeoutMs = utils.DEFAULT_TI
 
 /**
  * Uses the WeatherBit APIs to get the weather for a given location.
- * 
+ *
  * Returns the current weather if `numDays` is ≤ 1; returns the weather forecast otherwise.
- * 
+ *
  * Note: We get only 7 days in the future with the Free plan.
  *
  * @param {number} lon - The lon coordinate.
@@ -257,9 +255,6 @@ async function getWeatherForecast(lon, lat, apiKey, timeoutMs = utils.DEFAULT_TI
  * @returns {Promise<[number, typedefs.WeatherResult]>} A pair (http-status, error-or-result).
  */
 export async function getWeather(lon, lat, numDays, apiKey, timeoutMs = utils.DEFAULT_TIMEOUT_MS) {
-  const fn = 'getWeather';
-  logger.info('entering', { fn, lng: lon, lat, numDays, apiKey: sensitive(apiKey) });
-
   if (numDays <= 1) {
     return getWeatherCurrent(lon, lat, apiKey, timeoutMs);
   } else {
@@ -279,7 +274,6 @@ export async function getWeather(lon, lat, numDays, apiKey, timeoutMs = utils.DE
  */
 export function getWeatherTest(numDays) {
   const fn = 'getWeatherTest';
-  logger.info('entering', { fn, numDays });
 
   // Generic error message.
   const errMsg = 'Failed to get canned weather forecast data.';

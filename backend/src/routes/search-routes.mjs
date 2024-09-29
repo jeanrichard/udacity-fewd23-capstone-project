@@ -44,8 +44,16 @@ function makeSearchRouter(config) {
     checkExact(validateGetDestination()),
     makeHandleGetDestination(config.geoNamesUsername),
   );
-  router.post('/weather', checkExact(validateGetWeather()), makeHandleGetWeather(config.weatherBitApiKey));
-  router.post('/picture', checkExact(validateGetPicture()), makeHandleGetPicture(config.pixabayApiKey));
+  router.post(
+    '/weather',
+    checkExact(validateGetWeather()),
+    makeHandleGetWeather(config.weatherBitApiKey),
+  );
+  router.post(
+    '/picture',
+    checkExact(validateGetPicture()),
+    makeHandleGetPicture(config.pixabayApiKey),
+  );
 
   if (ENV !== 'production') {
     logger.info('adding test endpoints', { fn: 'makeSearchRouter', env: ENV });
