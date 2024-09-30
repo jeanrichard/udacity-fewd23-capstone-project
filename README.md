@@ -34,37 +34,63 @@ Content:
 
 ## 1. Quick Start
 
-Instead of having a single mixed project, we decided to split the project into 2 sub-projects, _frontend_ and _backend_, with their own set of dependencies (and thus their own *package.json*).
+Instead of having a single mixed project, we decided to split the project into 2 sub-projects,
+_frontend_ and _backend_, with their own set of dependencies (and thus their own *package.json*).
+
+Here is a screenshot of the front-end.
+
+<img
+  src="./assets/app-screenshot.png"
+  alt="A screenshot of the front-end showing the result after creating a new trip."
+  width="50%"
+/>
 
 ### Prerequisites
 
-This project makes use of 3 external services. You will need to sign-up and have credentials for each of them.
+This project makes use of 3 external services. You will need to sign-up and have credentials for each
+of them.
 
 **GeoNames:**
-- [GeoNames](https://geonames.org) is a comprehensive geographical database that provides information on millions of places worldwide, including cities, regions, and natural features. It offers a range of APIs, such as search, reverse geocoding, and postal code lookups.
+- [GeoNames](https://geonames.org) is a comprehensive geographical database that provides information
+  on millions of places worldwide, including cities, regions, and natural features. It offers a range
+  of APIs, such as search, reverse geocoding, and postal code lookups.
 - You can create an account [here](http://www.geonames.org/login).
-- We use the [GeoNames Search API](https://www.geonames.org/export/geonames-search.html) to find the destination entered by the user.
+- We use the [GeoNames Search API](https://www.geonames.org/export/geonames-search.html) to find the
+  destination entered by the user.
 
 **WeatherBit:**
-- [WeatherBit](https://www.weatherbit.io/) provides a comprehensive suite of real-time, historical and forecast weather data globally, offering detailed meteorological information like temperature, precipitation, and air quality. Those data are accessible through a range of APIs.
+- [WeatherBit](https://www.weatherbit.io/) provides a comprehensive suite of real-time, historical,
+  and forecast weather data globally, offering detailed meteorological information like temperature,
+  precipitation, and air quality. Those data are accessible through a range of APIs.
 - You can create an account [here](https://www.weatherbit.io/account/create).
-- We use the [Current Weather API](https://www.weatherbit.io/api/weather-current) to get the current weather at the destination, and the [Weather Forecast API](https://www.weatherbit.io/api/weather-forecast-api) to get the weather forecast at the destination (note that we get only 7 days in the future with the Free plan).
+- We use the [Current Weather API](https://www.weatherbit.io/api/weather-current) to get the current
+  weather at the destination, and the [Weather Forecast API](https://www.weatherbit.io/api/weather-
+  forecast-api) to get the weather forecast at the destination (note that we get only 7 days in the
+  future with the Free plan).
 
 **Pixabay:**
-- [Pixabay](https://pixabay.com/) offers a vast library of free, high-quality images, videos, and illustrations, allowing users to search, download, and integrate royalty-free media into their projects. An API provides free access to that library, with options for advanced search and filters.
+- [Pixabay](https://pixabay.com/) offers a vast library of free, high-quality images, videos, and
+  illustrations, allowing users to search, download, and integrate royalty-free media into their
+  projects. An API provides free access to that library, with options for advanced search and
+  filters.
 - You can create an account by clicking the _Join_ button on the landing page.
 - The documentation for the API is [here](https://pixabay.com/service/about/api/).
 
-Moreover, this project is built with [Node.js](https://nodejs.org/) (version 20) and managed with `npm`. For convenience, it was developed using [Development Containers](https://containers.dev/), but this is not a hard requirement. Any local installation of a suitable version of Node (e.g., with [nvm](https://github.com/nvm-sh/nvm)) should work. See also [7. How to use Dev Containers](#how-to-use-dev-containers).
+Moreover, this project is built with [Node.js](https://nodejs.org/) (version 20) and managed with 
+`npm`. For convenience, it was developed using [Development Containers](https://containers.dev/),
+but this is not a hard requirement. Any local installation of a suitable version of Node (e.g., with
+[nvm](https://github.com/nvm-sh/nvm)) should work. See also 
+[7. How to use Dev Containers](#how-to-use-dev-containers).
 
 ### Installation and configuration
 
-**🛈 Note:** For the sake of brevity, we assume that _Shell 1_ is always at the root of the _frontend_ sub-project:
+**🛈 Note:** For the sake of brevity, we assume that _Shell 1_ is always at the root of the
+_frontend_ sub-project:
 ```bash
 # Shell 1
 cd frontend
 ```
-And that _Shell 2_ is always at the root of the _backend_ sub-project:
+And that Shell 2 is always at the root of the backend sub-project:
 ```bash
 # Shell 2
 cd backend
@@ -113,8 +139,8 @@ Configure the backend:
   npm run start:dev
   ```
 
-- Open a browser and navigate to http://localhost:8080/ (this should be automatic if you are using Visual
-  Studio Code).
+- Open a browser and navigate to http://localhost:8080/ (this should be automatic if you are using
+  Visual Studio Code).
 
 This option is best suited for quick development as changes are immediately reflected in the UI
 thanks to Hot Module Reloading (HMR).
@@ -131,8 +157,8 @@ thanks to Hot Module Reloading (HMR).
   # Shell 2.
   npm run start:dev
   ```
-- Open a browser and navigate to http://localhost:3000/ (this should be automatic if you are using Visual
-  Studio Code).
+- Open a browser and navigate to http://localhost:3000/ (this should be automatic if you are using
+  Visual Studio Code).
 
 ### Running in production
 
@@ -148,8 +174,8 @@ Run the project using the back-end to serve a full production build:
   # Shell 2.
   npm run start:prod
   ```
-- Open a browser and navigate to http://localhost:3000/ (this should be automatic if you are using Visual
-  Studio Code).
+- Open a browser and navigate to http://localhost:3000/ (this should be automatic if you are using
+  Visual Studio Code).
 
 <a id="developing"></a>
 
@@ -244,7 +270,8 @@ In summary, all source _\*.js_ and _\*.mjs_ files should start with:
 
 ### Front-end
 
-As mentioned above, the front-end is a single page application (SPA). It allows the user to create a new trip based on:
+As mentioned above, the front-end is a single page application (SPA). It allows the user to create a
+new trip based on:
 - A destination.
 - A date of departure.
 - A date of return.
@@ -254,23 +281,36 @@ The trips are listed under 3 categories:
 - Pending
 - Past
 
-The _Ongoing_ and _Pending_ categories are sorted in chronological order while the _Past_ category is sorted in reverse chronological order.
+The _Ongoing_ and _Pending_ categories are sorted in chronological order while the _Past_ category
+is sorted in reverse chronological order.
 
 #### Flows
 
 Loading all trips:
 
-- When the frontend loads, it connects to the backend's `/trips` endpoint to GET all trips currently stored in the backend.
+- When the frontend loads, it connects to the backend's `/trips` endpoint to GET all trips currently
+  stored in the backend.
 
 Searching for a destination:
 
-- The front-end first connects to the backend's `/search/destination` endpoint, that uses the GeoNames Search API to do geo-coding. The destination entered by the user is treated as a query and resolved to a place-name, country-name and (lon, lat) coordinates. If an error occurs (e.g., if the destination cannot be found), we display an error and the flow stops.
+- The front-end first connects to the backend's `/search/destination` endpoint, that uses the
+  GeoNames Search API to do geo-coding. The destination entered by the user is treated as a query
+  and resolved to a place-name, country-name and (lon, lat) coordinates. If an error occurs (e.g.,
+  if the destination cannot be found), we display an error and the flow stops.
 
-- The front-end then connects to the backend's `/search/weather` endpoint, that uses the WeatherBit API to get the weather at the (lon, lat) coordinates. If the trip is at most 1 day in the future, we use the Current Weather API. Otherwise, we use the Weather Forecast API. Note that we get only 7 days in the future with the Free plan. So even if the trip is planned more than 7 days in the future, we still use the 7-day forecast. If an error occurs (e.g., if no forecast is available), we display an error and the flow stops.
+- The front-end then connects to the backend's `/search/weather` endpoint, that uses the WeatherBit
+  API to get the weather at the (lon, lat) coordinates. If the trip is at most 1 day in the future,
+  we use the Current Weather API. Otherwise, we use the Weather Forecast API. Note that we get only
+  7 days in the future with the Free plan. So even if the trip is planned more than 7 days in the 
+  future, we still use the 7-day forecast. If an error occurs (e.g., if no forecast is available),
+  we display an error and the flow stops.
 
-- The front-end finally connects to the backend's `/search/picture` API endpoint, that uses the Pixabay API to find a picture for the destination, using "&lt;place-name&gt; &lt;country-name&gt;" as query. If an error occurs (i.e., if no picture is available), we simply display a place-holder.
+- The front-end finally connects to the backend's `/search/picture` API endpoint, that uses the 
+  Pixabay API to find a picture for the destination, using "&lt;place-name&gt; &lt;country-name&gt;"
+  as query. If an error occurs (i.e., if no picture is available), we simply display a place-holder.
 
-- The resulting trip is shown in the UI in the _Pending_ category. Note that the trip is in draft state and **not saved, yet**.
+- The resulting trip is shown in the UI in the _Pending_ category. Note that the trip is in draft
+  state and **not saved, yet**.
 
 Saving a trip:
 
@@ -310,7 +350,10 @@ Implementation:
   [CommonJS Modules](https://nodejs.org/docs/latest-v20.x/api/modules.html) (CJS).
 
 Other notes:
-- As images returned by the Pixabay API can have different aspect ratios, we use the CSS rules below. An alternative would have been to resize while keeping the aspect ration and then to pad the picture, resulting in a pair of vertical or horizontal "bands" around the picture (whose color could be fixed or use the "average" color of the picture).
+- As images returned by the Pixabay API can have different aspect ratios, we use the CSS rules
+  below. An alternative would have been to resize while keeping the aspect ration and then to pad
+  the picture, resulting in a pair of vertical or horizontal "bands" around the picture (whose color
+  could be fixed or use the "average" color of the picture).
   ```css
   img {
     width: 100%;
@@ -334,23 +377,43 @@ Tests:
 
 User experience:
 - Allow the user to specify the country.
-- Instead of directly displaying a trip based on the best search result, display the search results on a separate page and let the user choose.
+- Instead of directly displaying a trip based on the best search result, display the search results
+  on a separate page and let the user choose. This reference could be useful:
+  - [Build a custom SPA Router using VanillaJS](https://dev.to/skaytech/build-a-custom-spa-router-using-vanillajs-4a9l),
+    Karthik Shivkumar, 2020.
 
 Implementation:
-- When we need to add a new trip, we clone a `<template>` element and then adjust the content. We could use a real template system instead.
-- Once the frontend has collected the needed pieces of information (destination, weather, picture) and POSTs the new trip to the `/trips` endpoint, we validate the properties of the object being posted, but we do not check that the weather and picture are really for the given destination. A malevolent user could e.g., use `curl` to post a trip with inconsistent data. Ideas:
-   - The frontend could POST only the destination. The backend would again collect the missing pieces of information (weather, picture). The backend could use caching to avoid paying multiple times when using metered 3rd party APIs.
-   - We could build the draft trip entirely on the backend. This seems to go against the REST principles and would require preventing unused draft trips from accumulating (maybe setting a maximum number of drafts per user once, authentication has been added).
-   - We could define a token that identifies the query (e.g., "&lt;place-name&gt;:&lt;country-name&gt;:&lt;lon/lat&gt;") and pass it to to the following `/search` endpoints. A given endpoint would returns the usual piece of information, plus a digest of the (token, data) pair. To create a new trip, the frontend would POST the token and all pieces of information and their digests. The backend would verify that all pieces of information have not been tampered and relate to the same token.
+- When we need to add a new trip, we clone a `<template>` element and then adjust the content. We
+  could use a real template system instead.
+- Once the frontend has collected the needed pieces of information (destination, weather, picture)
+  and POSTs the new trip to the `/trips` endpoint, we validate the properties of the object being
+  posted, but we do not check that the weather and picture are really for the given destination. A
+  malevolent user could e.g., use `curl` to post a trip with inconsistent data. Ideas:
+  - The frontend could POST only the destination. The backend would again collect the missing pieces
+    of information (weather, picture). The backend could use caching to avoid paying multiple times
+    when using metered 3rd party APIs.
+  - We could build the draft trip entirely on the backend. This seems to go against the REST
+    principles and would require preventing unused draft trips from accumulating (maybe setting a
+    maximum number of drafts per user, once authentication has been added).
+  - We could define a token that identifies the query (e.g., 
+    "&lt;place-name&gt;:&lt;country-name&gt;:&lt;lon/lat&gt;") and pass it to to the following
+    `/search` endpoints. A given endpoint would returns the usual piece of information, plus a
+    digest of the (token, data) pair. To create a new trip, the frontend would POST the token and
+    all pieces of information and their digests. The backend would verify that all pieces of
+    information have not been tampered and relate to the same token.
 - Refactor the frontend to use an MVC approach. Those references could be useful:
-  - [Writing a TodoMVC App with Modern Vanilla JavaScript](https://frontendmasters.com/blog/vanilla-javascript-todomvc/), Marc Grabanski, 2022.
-  - [How to Build a Simple MVC App From Scratch in JavaScript](https://www.taniarascia.com/javascript-mvc-todo-app/), Tania Rascia, 2019.
+  - [Writing a TodoMVC App with Modern Vanilla JavaScript](https://frontendmasters.com/blog/vanilla-javascript-todomvc/),
+    Marc Grabanski, 2022.
+  - [How to Build a Simple MVC App From Scratch in JavaScript](https://www.taniarascia.com/javascript-mvc-todo-app/),
+    Tania Rascia, 2019.
 - Build a better offline experience. This reference could be useful:
-  - [Progressive Web Apps (PWA) - The Complete Guide](https://www.udemy.com/course/progressive-web-app-pwa-the-complete-guide/) by Maximilian Schwarzmüller.
+  - [Progressive Web Apps (PWA) - The Complete Guide](https://www.udemy.com/course/progressive-web-app-pwa-the-complete-guide/)
+    by Maximilian Schwarzmüller.
 
 ### The backend
 
-As mentioned above, the back-end is an API. It is responsible for interacting with 3rd party APIs and for storing the trips in a mock data store.
+As mentioned above, the back-end is an API. It is responsible for interacting with 3rd party APIs
+and for storing the trips in a mock data store.
 
 Here is a brief description of the `search` endpoints:
 - `GET /search/destination`: Searches for a destination.
@@ -375,7 +438,8 @@ Here is a brief description of the `trips` endpoints:
 
 - `POST /trips`: Adds a trip to the mock data store.
   - Request validation: see [validate-create-trip.mjs](backend/src/middleware/trips/validate-create-trip.mjs).
-  - Response: returns an object of the form `{ "tripId": "<tripId>", "message": "<message>>" }`, where the `<tripId>` is the trip ID assigned by the backend.
+  - Response: returns an object of the form `{ "tripId": "<tripId>", "message": "<message>>" }`,
+    where the `<tripId>` is the trip ID assigned by the backend.
   - Implementation: see [trips-service.mjs](backend/src/services/trips/trips-service.mjs).
 - `GET /trips`: Returns all trips in the mock data store.
   - Request validation: n/a.
@@ -407,12 +471,13 @@ Implementation:
 - We use a few additional modules:
   - [express-validator](https://www.npmjs.com/package/express-validator) to validate requests made
     by clients.
+  - [winston](https://www.npmjs.com/package/winston) for logging.
 
 <a id="sources-and-assets"></a>
 
 ## 4. Sources and assets
 
-We added the following additional assets to the starter project:
+We used the following additional assets:
 
 - PNG-s from [Flaticon](https://www.flaticon.com/) (free for personal and commercial use with
   attribution, see [Flaticon Terms of use](https://www.freepikcompany.com/legal#nav-flaticon) for
@@ -422,6 +487,11 @@ We added the following additional assets to the starter project:
     from the [Trip icons created by Prettycons - Flaticon](https://www.flaticon.com/free-icons/trip).  
     Author: Prettycons  
     Use: Logo
+
+- Icons from [Iconify](https://iconify.design/):
+  - https://icon-sets.iconify.design/mdi/walk/
+  - https://icon-sets.iconify.design/mdi/clock-time-four-outline/
+  - https://icon-sets.iconify.design/mdi/archive-outline/
 
 <a id="additional-references"></a>
 

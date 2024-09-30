@@ -19,6 +19,26 @@ const mockDataStore = new Map();
  *------------------------------------------------------------------------------------------------*/
 
 /**
+ * Adds a trip to the mock data store.
+ *
+ * @param {typedefs.Trip} trip - The trip to add.
+ * @returns {Promise<[number, object]>} A pair (http-status, result).
+ */
+export async function addTrip(trip) {
+  // We generate the trip ID.
+  const tripId = randomUUID();
+  trip.tripId = tripId;
+
+  // We add the trip.
+  mockDataStore.set(tripId, trip);
+
+  // Send status and response.
+  const resStatus = 200;
+  const resData = { tripId: tripId, message: 'Success.' };
+  return [resStatus, resData];
+}
+
+/**
  * Returns all trips in the mock data store.
  *
  * @returns {Promise<[number, Array<typedefs.Trip>]>} A pair (http-status, result).
@@ -36,7 +56,7 @@ export async function getTrips() {
 }
 
 /**
- * Remvoves a trip from the mock data store.
+ * Removes a trip from the mock data store.
  *
  * @param {string} tripId - The ID of the trip to remove.
  * @returns {Promise<[number, object]>} A pair (http-status, error-or-result).
@@ -56,25 +76,5 @@ export async function removeTrip(tripId) {
     resStatus = 200;
     resData = { message: 'Success.' };
   }
-  return [resStatus, resData];
-}
-
-/**
- * Adds a trip to the mock data store.
- *
- * @param {typedefs.Trip} trip - The trip to add.
- * @returns {Promise<[number, object]>} A pair (http-status, result).
- */
-export async function addTrip(trip) {
-  // We generate the trip ID.
-  const tripId = randomUUID();
-  trip.tripId = tripId;
-
-  // We add the trip.
-  mockDataStore.set(tripId, trip);
-
-  // Send status and response.
-  const resStatus = 200;
-  const resData = { tripId: tripId, message: 'Success.' };
   return [resStatus, resData];
 }

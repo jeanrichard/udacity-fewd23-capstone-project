@@ -36,10 +36,10 @@
       width: 100%;
       height: 100%;
 
-      /* Preserve aspect ratio while fitting inside the container */
+      /* Preserve aspect ratio while fitting inside the container. */
       object-fit: cover;
 
-      /* Center the image within the container */
+      /* Center the image within the container. */
       object-position: center;
     }
   }

@@ -81,7 +81,7 @@ export function clearError(tripElt) {
 }
 
 /**
- * Splits a trip collection into 3 catgories (ongoing/pending/past).
+ * Splits a trip collection into 3 categories (ongoing/pending/past).
  *
  * @param {Map<string, typedefs.Trip>} trips - The collection of trips to split.
  * @param {luxon.DateTime} now - The current date & time.

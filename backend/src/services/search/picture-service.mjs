@@ -65,7 +65,7 @@ function getPictureMakeUrl(q, apiKey) {
     ['lang', 'en'], // English.
     ['image_type', 'photo'],
     ['safesearch', 'true'], // Only images suitable for all ages.
-    ['order', 'popularx'],
+    ['order', 'popular'],
     ['per_page', '5'], // Default is 20.
   ]).toString();
   return reqUrlObj.toString();
